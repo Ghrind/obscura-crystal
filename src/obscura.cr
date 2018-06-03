@@ -5,10 +5,17 @@ require "./obscura/mission"
 app = Hydra::Application.setup
 game = Obscura::Game.new
 
-missions = Array(Obscura::Mission).new
-10.times do
-  missions.push Obscura::Mission.new
+def generate_missions() Array(Obscura::Mission)
+  missions = Array(Obscura::Mission).new
+  10.times do
+    mission = Obscura::Mission.new
+    mission.difficulty = (Random.rand(10) + 1) * 10
+    missions.push mission
+  end
+  missions
 end
+
+missions = generate_missions
 
 # Main menu
 
@@ -66,7 +73,7 @@ app.add_element({
   :type => "list",
   :height => "12",
   :position => "center",
-  :width => "22",
+  :width => "24",
   :label => "Select a mission",
   :visible => "false",
 })
