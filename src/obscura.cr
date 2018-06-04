@@ -58,12 +58,13 @@ end
 app.add_element({
   :id => "game-info",
   :type => "text",
-  :template => "Reputation: {{game.reputation}}",
+  :template => "Reputation: {{game.reputation}}\nPlayer level: {{game.player_level}}",
   :visible => "false",
 })
 
 app.bind("ready") do |_, _, _, state|
   state["game.reputation"] = game.reputation.to_s
+  state["game.player_level"] = game.player_level.to_s
   true
 end
 
@@ -97,11 +98,13 @@ app.bind("missions-menu", "keypress.enter") do |event_hub, _, elements, state|
     if mission.completed
       event_hub.trigger("messages", "add_message", { "message" => "You have already completed this mission." })
     else
-      roll = Random.rand(100) + 1
+      roll = Random.rand(100) + 1 + game.player_level * 5
       event_hub.trigger("messages", "add_message", { "message" => "You rolled a #{roll} against #{mission.difficulty}." })
       if roll >= mission.difficulty
         game.reputation += mission.difficulty
+        game.player_level += 1
         mission.completed = true
+        state["game.player_level"] = game.player_level.to_s
         state["game.reputation"] = game.reputation.to_s
         event_hub.trigger("messages", "add_message", { "message" => "Mission completed \"#{mission.name}\" successfuly" })
       else
