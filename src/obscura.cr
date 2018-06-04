@@ -46,6 +46,7 @@ app.bind("main-menu", "keypress.enter") do |event_hub, _, elements, _|
   when 0 # New Game
     menu.hide
     elements.by_id("game-info").show
+    elements.by_id("messages").show
     elements.by_id("missions-menu").show
     event_hub.focus("missions-menu")
   end
@@ -93,15 +94,31 @@ app.bind("missions-menu", "keypress.enter") do |event_hub, _, elements, state|
   menu = elements.by_id("missions-menu")
   if menu.selected != nil
     mission = missions[menu.selected.not_nil!]
-    game.reputation += mission.difficulty
-    state["game.reputation"] = game.reputation.to_s
+    if mission.completed
+      event_hub.trigger("messages", "add_message", { "message" => "You have already completed this mission." })
+    else
+      game.reputation += mission.difficulty
+      mission.completed = true
+      state["game.reputation"] = game.reputation.to_s
+      event_hub.trigger("messages", "add_message", { "message" => "Mission completed \"#{mission.name}\" successfuly" })
+    end
   end
   if game.won?
+    elements.each { |element| element.hide }
     elements.by_id("winning-screen").show
     event_hub.focus("winning-screen")
   end
   false
 end
+
+# Messages
+app.add_element({
+  :id => "messages",
+  :type => "logbox",
+  :visible => "false",
+  :label => "Messages",
+  :position => "8:0",
+})
 
 # Winning screen
 app.add_element({

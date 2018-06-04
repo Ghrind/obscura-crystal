@@ -5,10 +5,12 @@ module Obscura
 
     property :difficulty
     property :name
+    property :completed
 
     def initialize
       @name = DEFAULT_NAME
       @difficulty = DEFAULT_DIFFICULTY
+      @completed = false
     end
   end
 end
