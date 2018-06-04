@@ -104,6 +104,7 @@ app.bind("missions-menu", "keypress.enter") do |event_hub, _, elements, state|
         game.reputation += mission.difficulty
         game.player_level += 1
         mission.completed = true
+        event_hub.trigger("missions-menu", "change_item", { "index" => menu.selected.to_s, "item" => "<green-fg>#{mission.name} (#{mission.difficulty})</green-fg>" })
         state["game.player_level"] = game.player_level.to_s
         state["game.reputation"] = game.reputation.to_s
         event_hub.trigger("messages", "add_message", { "message" => "Mission completed \"#{mission.name}\" successfuly" })
