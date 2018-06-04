@@ -97,10 +97,16 @@ app.bind("missions-menu", "keypress.enter") do |event_hub, _, elements, state|
     if mission.completed
       event_hub.trigger("messages", "add_message", { "message" => "You have already completed this mission." })
     else
-      game.reputation += mission.difficulty
-      mission.completed = true
-      state["game.reputation"] = game.reputation.to_s
-      event_hub.trigger("messages", "add_message", { "message" => "Mission completed \"#{mission.name}\" successfuly" })
+      roll = Random.rand(100) + 1
+      event_hub.trigger("messages", "add_message", { "message" => "You rolled a #{roll} against #{mission.difficulty}." })
+      if roll >= mission.difficulty
+        game.reputation += mission.difficulty
+        mission.completed = true
+        state["game.reputation"] = game.reputation.to_s
+        event_hub.trigger("messages", "add_message", { "message" => "Mission completed \"#{mission.name}\" successfuly" })
+      else
+        event_hub.trigger("messages", "add_message", { "message" => "Mission \"#{mission.name}\" failed." })
+      end
     end
   end
   if game.won?
