@@ -1,6 +1,8 @@
 require "hydra"
 require "./obscura/game"
 require "./obscura/mission"
+require "./obscura/mission_result"
+require "./obscura/actions/try_mission"
 
 app = Hydra::Application.setup
 game = Obscura::Game.new
@@ -95,22 +97,18 @@ app.bind("missions-menu", "keypress.enter") do |event_hub, _, elements, state|
   menu = elements.by_id("missions-menu")
   if menu.selected != nil
     mission = missions[menu.selected.not_nil!]
-    if mission.completed
+    result = Obscura::TryMission.new(game, mission).run!
+    case result.status
+    when :already_completed
       event_hub.trigger("messages", "add_message", { "message" => "You have already completed this mission." })
-    else
-      roll = Random.rand(100) + 1 + game.player_level * 5
-      event_hub.trigger("messages", "add_message", { "message" => "You rolled a #{roll} against #{mission.difficulty}." })
-      if roll >= mission.difficulty
-        game.reputation += mission.difficulty
-        game.player_level += 1
-        mission.completed = true
-        event_hub.trigger("missions-menu", "change_item", { "index" => menu.selected.to_s, "item" => "<green-fg>#{mission.name} (#{mission.difficulty})</green-fg>" })
-        state["game.player_level"] = game.player_level.to_s
-        state["game.reputation"] = game.reputation.to_s
-        event_hub.trigger("messages", "add_message", { "message" => "Mission completed \"#{mission.name}\" successfuly" })
-      else
-        event_hub.trigger("messages", "add_message", { "message" => "Mission \"#{mission.name}\" failed." })
-      end
+    when :success
+      event_hub.trigger("messages", "add_message", { "message" => "You rolled a #{result.roll} against #{mission.difficulty}." })
+      event_hub.trigger("missions-menu", "change_item", { "index" => menu.selected.to_s, "item" => "<green-fg>#{mission.name} (#{mission.difficulty})</green-fg>" })
+      state["game.player_level"] = game.player_level.to_s
+      state["game.reputation"] = game.reputation.to_s
+    when :failure
+      event_hub.trigger("messages", "add_message", { "message" => "You rolled a #{result.roll} against #{mission.difficulty}." })
+      event_hub.trigger("messages", "add_message", { "message" => "Mission \"#{mission.name}\" failed." })
     end
   end
   if game.won?
