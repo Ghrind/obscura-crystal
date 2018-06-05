@@ -1,7 +1,6 @@
 module Obscura
   class WinCurrentMission
-    def initialize(game : Obscura::Game)
-      @game = game
+    def initialize(@game : Obscura::Game)
     end
 
     def run!

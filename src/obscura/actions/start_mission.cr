@@ -1,8 +1,6 @@
 module Obscura
   class StartMission
-    def initialize(game : Obscura::Game, mission_index : Int32)
-      @game = game
-      @mission_index = mission_index
+    def initialize(@game : Obscura::Game, @mission_index : Int32)
     end
 
     def run!() Bool
