@@ -7,10 +7,15 @@ module Obscura
 
     property :reputation
     property :player_level
+    property :missions
+    @current_mission : Obscura::Mission | Nil
+    property :current_mission
 
     def initialize
       @reputation = INITIAL_REPUTATION
       @player_level = INITIAL_PLAYER_LEVEL
+      @missions = Array(Obscura::Mission).new
+      @current_mission = nil
     end
 
     def won?

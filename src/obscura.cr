@@ -2,22 +2,13 @@ require "hydra"
 require "./obscura/game"
 require "./obscura/mission"
 require "./obscura/mission_result"
-require "./obscura/actions/try_mission"
+require "./obscura/actions/start_mission"
+require "./obscura/actions/win_current_mission"
+require "./obscura/actions/generate_missions"
 
 app = Hydra::Application.setup
 game = Obscura::Game.new
-
-def generate_missions() Array(Obscura::Mission)
-  missions = Array(Obscura::Mission).new
-  10.times do
-    mission = Obscura::Mission.new
-    mission.difficulty = (Random.rand(10) + 1) * 10
-    missions.push mission
-  end
-  missions
-end
-
-missions = generate_missions
+Obscura::GenerateMissions.new(game).run!
 
 # Main menu
 
@@ -84,7 +75,7 @@ app.add_element({
 
 app.bind("ready") do |event_hub, _, elements, _|
   menu = elements.by_id("missions-menu")
-  missions.each do |mission|
+  game.missions.each do |mission|
     menu.add_item("#{mission.name} (#{mission.difficulty})")
   end
   true
@@ -93,28 +84,49 @@ end
 app.bind("missions-menu", "keypress.j", "missions-menu", "select_down")
 app.bind("missions-menu", "keypress.k", "missions-menu", "select_up")
 
-app.bind("missions-menu", "keypress.enter") do |event_hub, _, elements, state|
+app.bind("missions-menu", "keypress.enter") do |event_hub, _, elements, _|
   menu = elements.by_id("missions-menu")
   if menu.selected != nil
-    mission = missions[menu.selected.not_nil!]
-    result = Obscura::TryMission.new(game, mission).run!
-    case result.status
-    when :already_completed
-      event_hub.trigger("messages", "add_message", { "message" => "You have already completed this mission." })
-    when :success
-      event_hub.trigger("messages", "add_message", { "message" => "You rolled a #{result.roll} against #{mission.difficulty}." })
-      event_hub.trigger("missions-menu", "change_item", { "index" => menu.selected.to_s, "item" => "<green-fg>#{mission.name} (#{mission.difficulty})</green-fg>" })
-      state["game.player_level"] = game.player_level.to_s
-      state["game.reputation"] = game.reputation.to_s
-    when :failure
-      event_hub.trigger("messages", "add_message", { "message" => "You rolled a #{result.roll} against #{mission.difficulty}." })
-      event_hub.trigger("messages", "add_message", { "message" => "Mission \"#{mission.name}\" failed." })
+    result = Obscura::StartMission.new(game, menu.selected.not_nil!).run!
+    if result
+      event_hub.trigger("messages", "add_message", { "message" => "Starting mission \"#{game.current_mission.not_nil!.name}\"" })
+      elements.by_id("missions-menu").hide
+      elements.by_id("fight-panel").show
+      event_hub.focus("fight-panel")
+    else
+      event_hub.trigger("messages", "add_message", { "message" => "You cannot start a mission that is already completed." })
     end
   end
+  false
+end
+
+# Fight Panel
+app.add_element({
+  :id => "fight-panel",
+  :type => "text",
+  :label => "Fight",
+  :value => "foobar",
+  :visible => "false",
+  :position => "center",
+})
+
+app.bind("fight-panel", "keypress.enter") do |event_hub, _, elements, state|
+  menu = elements.by_id("missions-menu")
+  mission = game.current_mission.not_nil!
+  Obscura::WinCurrentMission.new(game).run!
+  event_hub.trigger("messages", "add_message", { "message" => "Mission completed \"#{mission.name}\"." })
+  event_hub.trigger("missions-menu", "change_item", { "index" => menu.selected.to_s, "item" => "<green-fg>#{mission.name} (#{mission.difficulty})</green-fg>" })
+  state["game.player_level"] = game.player_level.to_s
+  state["game.reputation"] = game.reputation.to_s
+
   if game.won?
     elements.each { |element| element.hide }
     elements.by_id("winning-screen").show
     event_hub.focus("winning-screen")
+  else
+    elements.by_id("fight-panel").hide
+    elements.by_id("missions-menu").show
+    event_hub.focus("missions-menu")
   end
   false
 end
