@@ -7,7 +7,7 @@ require "./obscura/actions/win_current_mission"
 require "./obscura/actions/generate_missions"
 
 app = Obscura::Application.setup
-game = Obscura::Game.new
+game = app.game
 Obscura::GenerateMissions.new(game).run!
 
 # Main menu
@@ -54,12 +54,6 @@ app.add_element({
   :template => "Reputation: {{game.reputation}}\nPlayer level: {{game.player_level}}",
   :visible => "false",
 })
-
-app.bind("ready") do |_, _, _, state|
-  state["game.reputation"] = game.reputation.to_s
-  state["game.player_level"] = game.player_level.to_s
-  true
-end
 
 # Missions menu
 
@@ -110,14 +104,12 @@ app.add_element({
   :position => "center",
 })
 
-app.bind("fight-panel", "keypress.enter") do |event_hub, _, elements, state|
+app.bind("fight-panel", "keypress.enter") do |event_hub, _, elements, _|
   menu = elements.by_id("missions-menu")
   mission = game.current_mission.not_nil!
   Obscura::WinCurrentMission.new(game).run!
   app.game_message("Mission completed \"#{mission.name}\".")
   event_hub.trigger("missions-menu", "change_item", { "index" => menu.selected.to_s, "item" => "<green-fg>#{mission.name} (#{mission.difficulty})</green-fg>" })
-  state["game.player_level"] = game.player_level.to_s
-  state["game.reputation"] = game.reputation.to_s
 
   if game.won?
     elements.each { |element| element.hide }
