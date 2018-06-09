@@ -1,13 +1,8 @@
 module Obscura
   class MissionResult
-    NO_ROLL = -1
+    property :mission_name
 
-    getter :roll
-    getter :status
-
-    def initialize(status : Symbol, roll = NO_ROLL)
-      @roll = roll
-      @status = status
+    def initialize(@mission_name : String)
     end
   end
 end

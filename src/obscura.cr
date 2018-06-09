@@ -5,7 +5,9 @@ require "./obscura/mission"
 require "./obscura/mission_result"
 require "./obscura/actions/start_mission"
 require "./obscura/actions/win_current_mission"
+require "./obscura/actions/cancel_current_mission"
 require "./obscura/actions/generate_missions"
+require "./obscura/elements/missions_list"
 
 app = Obscura::Application.setup
 game = app.game
@@ -59,21 +61,19 @@ app.add_element({
 
 # Missions menu
 
-app.add_element({
-  :id => "missions-menu",
-  :type => "list",
+missions_menu = Obscura::MissionsList.new("missions-menu", {
   :height => "12",
   :position => "center",
   :width => "24",
   :label => "Select a mission",
   :visible => "false",
 })
+app.add_element(missions_menu)
 
 app.bind("ready") do |event_hub, _, elements, _|
-  menu = elements.by_id("missions-menu").as(Hydra::List)
-  game.missions.each do |mission|
-    menu.add_item("#{mission.name} (#{mission.difficulty})")
-  end
+  menu = elements.by_id("missions-menu").as(Obscura::MissionsList)
+  menu.missions = game.missions
+  menu.select_first
   true
 end
 
@@ -88,7 +88,8 @@ app.bind("missions-menu", "keypress.enter") do |event_hub, _, elements, _|
       app.game_message("Starting mission \"#{game.current_mission.not_nil!.name}\"")
       elements.by_id("missions-menu").hide
       elements.by_id("fight-panel").show
-      event_hub.focus("fight-panel")
+      elements.by_id("fight-actions").show
+      event_hub.focus("fight-actions")
     else
       app.game_message("You cannot start a mission that is already completed.")
     end
@@ -96,32 +97,56 @@ app.bind("missions-menu", "keypress.enter") do |event_hub, _, elements, _|
   false
 end
 
+combat_positions = "    \n" \
+                   " 1A \n" \
+                   "    \n" \
+                   "    \n" \
+
 # Fight Panel
 app.add_element({
   :id => "fight-panel",
   :type => "text",
   :label => "Fight",
-  :value => "foobar",
+  :value => combat_positions,
   :visible => "false",
   :position => "center",
+  :autosize => "true",
 })
 
-app.bind("fight-panel", "keypress.enter") do |event_hub, _, elements, _|
-  menu = elements.by_id("missions-menu").as(Hydra::List)
-  mission = game.current_mission.not_nil!
-  Obscura::WinCurrentMission.new(game).run!
-  app.game_message("Mission completed \"#{mission.name}\".")
-  event_hub.trigger("missions-menu", "change_item", { "index" => menu.selected.to_s, "item" => "<green-fg>#{mission.name} (#{mission.difficulty})</green-fg>" })
+# Fight Actions
+app.add_element({
+  :id => "fight-actions",
+  :type => "text",
+  :label => "Fight actions",
+  :value => "(A)ttack, (W)ait, (F)lee?",
+  :visible => "false",
+  :position => "0:30",
+  :autosize => "true",
+})
 
-  if game.won?
-    elements.each { |element| element.hide }
-    elements.by_id("winning-screen").show
-    event_hub.focus("winning-screen")
-  else
-    elements.by_id("fight-panel").hide
-    elements.by_id("missions-menu").show
+app.bind("fight-actions", "keypress.*") do |event_hub, event, elements, _|
+  case event.keypress.not_nil!.char
+  when "a"
+    app.game_message("Player attacks and kills the opponent")
+    result = Obscura::WinCurrentMission.new(game).run!
+    app.game_message("Mission completed \"#{result.mission_name}\".")
+
+    if game.won?
+      elements.show_only("winning-screen")
+      event_hub.focus("winning-screen")
+    else
+      elements.show_only("missions-menu", "game-info", "messages")
+      event_hub.focus("missions-menu")
+    end
+  when "f"
+    app.game_message("Player has fled")
+    Obscura::CancelCurrentMission.new(game).run!
+    elements.show_only("missions-menu", "game-info", "messages")
     event_hub.focus("missions-menu")
+  when "w"
+    app.game_message("Player waits and is attacked")
   end
+
   false
 end
 

@@ -1,3 +1,5 @@
+require "./../mission_result"
+
 module Obscura
   class WinCurrentMission
     def initialize(@game : Obscura::Game)
@@ -9,6 +11,7 @@ module Obscura
       @game.reputation += mission.difficulty
       @game.player_level += 1
       @game.current_mission = nil
+      MissionResult.new(mission.name)
     end
   end
 end
