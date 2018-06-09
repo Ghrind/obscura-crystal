@@ -1,3 +1,4 @@
+require "hydra"
 require "./obscura/application"
 require "./obscura/game"
 require "./obscura/mission"
@@ -22,7 +23,7 @@ app.add_element({
 })
 
 app.bind("ready") do |event_hub, _, elements, _|
-  menu = elements.by_id("main-menu")
+  menu = elements.by_id("main-menu").as(Hydra::List)
   menu.add_item("New Game")
   menu.add_item("Quit")
   true
@@ -32,7 +33,7 @@ app.bind("main-menu", "keypress.j", "main-menu", "select_down")
 app.bind("main-menu", "keypress.k", "main-menu", "select_up")
 
 app.bind("main-menu", "keypress.enter") do |event_hub, _, elements, _|
-  menu = elements.by_id("main-menu")
+  menu = elements.by_id("main-menu").as(Hydra::List)
   case menu.selected
   when 1 # Exit
     event_hub.trigger("application", "stop")
@@ -53,6 +54,7 @@ app.add_element({
   :type => "text",
   :template => "Reputation: {{game.reputation}}\nPlayer level: {{game.player_level}}",
   :visible => "false",
+  :width => "30",
 })
 
 # Missions menu
@@ -68,7 +70,7 @@ app.add_element({
 })
 
 app.bind("ready") do |event_hub, _, elements, _|
-  menu = elements.by_id("missions-menu")
+  menu = elements.by_id("missions-menu").as(Hydra::List)
   game.missions.each do |mission|
     menu.add_item("#{mission.name} (#{mission.difficulty})")
   end
@@ -79,7 +81,7 @@ app.bind("missions-menu", "keypress.j", "missions-menu", "select_down")
 app.bind("missions-menu", "keypress.k", "missions-menu", "select_up")
 
 app.bind("missions-menu", "keypress.enter") do |event_hub, _, elements, _|
-  menu = elements.by_id("missions-menu")
+  menu = elements.by_id("missions-menu").as(Hydra::List)
   if menu.selected != nil
     result = Obscura::StartMission.new(game, menu.selected.not_nil!).run!
     if result
@@ -105,7 +107,7 @@ app.add_element({
 })
 
 app.bind("fight-panel", "keypress.enter") do |event_hub, _, elements, _|
-  menu = elements.by_id("missions-menu")
+  menu = elements.by_id("missions-menu").as(Hydra::List)
   mission = game.current_mission.not_nil!
   Obscura::WinCurrentMission.new(game).run!
   app.game_message("Mission completed \"#{mission.name}\".")
@@ -140,6 +142,7 @@ app.add_element({
   :type => "text",
   :label => "Victory!",
   :value => "You have won the game!",
+  :autosize => "true",
 })
 
 app.bind("winning-screen", "keypress.*", "application", "stop")

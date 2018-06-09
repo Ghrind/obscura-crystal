@@ -1,3 +1,5 @@
+require "./mission"
+
 module Obscura
   class Game
     INITIAL_REPUTATION = 0
