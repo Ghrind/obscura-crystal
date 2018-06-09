@@ -3,11 +3,13 @@ require "./obscura/application"
 require "./obscura/game"
 require "./obscura/mission"
 require "./obscura/mission_result"
+require "./obscura/combat_action"
 require "./obscura/actions/start_mission"
 require "./obscura/actions/win_current_mission"
 require "./obscura/actions/cancel_current_mission"
 require "./obscura/actions/generate_missions"
 require "./obscura/elements/missions_list"
+require "./obscura/elements/combat_actions_selector"
 
 app = Obscura::Application.setup
 game = app.game
@@ -87,9 +89,9 @@ app.bind("missions-menu", "keypress.enter") do |event_hub, _, elements, _|
     if result
       app.game_message("Starting mission \"#{game.current_mission.not_nil!.name}\"")
       elements.by_id("missions-menu").hide
-      elements.by_id("fight-panel").show
-      elements.by_id("fight-actions").show
-      event_hub.focus("fight-actions")
+      elements.by_id("combat-panel").show
+      elements.by_id("combat-actions").show
+      event_hub.focus("combat-actions")
     else
       app.game_message("You cannot start a mission that is already completed.")
     end
@@ -102,31 +104,38 @@ combat_positions = "    \n" \
                    "    \n" \
                    "    \n" \
 
-# Fight Panel
+# Combat Panel
 app.add_element({
-  :id => "fight-panel",
+  :id => "combat-panel",
   :type => "text",
-  :label => "Fight",
+  :label => "Combat",
   :value => combat_positions,
   :visible => "false",
   :position => "center",
   :autosize => "true",
 })
 
-# Fight Actions
-app.add_element({
-  :id => "fight-actions",
-  :type => "text",
-  :label => "Fight actions",
-  :value => "(A)ttack, (W)ait, (F)lee?",
+# Combat Actions Selector
+combat_actions = Obscura::CombatActionsSelector.new("combat-actions", {
+  :label => "Combat actions",
   :visible => "false",
   :position => "0:30",
-  :autosize => "true",
+  :width => "35",
 })
+app.add_element(combat_actions)
 
-app.bind("fight-actions", "keypress.*") do |event_hub, event, elements, _|
-  case event.keypress.not_nil!.char
-  when "a"
+combat_actions.available_actions = [
+  Obscura::CombatAction.new("a", "Attack", true),
+  Obscura::CombatAction.new("w", "Wait"),
+  Obscura::CombatAction.new("f", "Flee"),
+]
+
+combat_actions.available_targets = ["1"]
+
+app.bind("combat-actions.complete") do |event_hub, _, elements, _|
+  actions = elements.by_id("combat-actions").as(Obscura::CombatActionsSelector)
+  case actions.current_action.not_nil!.name
+  when "Attack"
     app.game_message("Player attacks and kills the opponent")
     result = Obscura::WinCurrentMission.new(game).run!
     app.game_message("Mission completed \"#{result.mission_name}\".")
@@ -138,16 +147,16 @@ app.bind("fight-actions", "keypress.*") do |event_hub, event, elements, _|
       elements.show_only("missions-menu", "game-info", "messages")
       event_hub.focus("missions-menu")
     end
-  when "f"
+  when "Flee"
     app.game_message("Player has fled")
     Obscura::CancelCurrentMission.new(game).run!
     elements.show_only("missions-menu", "game-info", "messages")
     event_hub.focus("missions-menu")
-  when "w"
+  when "Wait"
     app.game_message("Player waits and is attacked")
   end
-
-  false
+  actions.reset!
+  true
 end
 
 # Messages
@@ -157,6 +166,7 @@ app.add_element({
   :visible => "false",
   :label => "Messages",
   :position => "8:0",
+  :width => "100",
 })
 
 # Winning screen
