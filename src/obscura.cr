@@ -9,7 +9,6 @@ require "./obscura/actions/start_mission"
 require "./obscura/actions/win_current_mission"
 require "./obscura/actions/cancel_current_mission"
 require "./obscura/actions/generate_missions"
-require "./obscura/actions/generate_encounter"
 require "./obscura/elements/missions_list"
 require "./obscura/elements/combat_actions_selector"
 require "./obscura/elements/combat_positions"
@@ -97,8 +96,7 @@ app.bind("missions-menu", "keypress.enter") do |event_hub, _, elements, _|
 
       combat_panel = elements.by_id("combat-panel").as(Obscura::CombatPositions)
       combat = Obscura::Combat.new
-      encounter = Obscura::GenerateEncounter.new.run!
-      combat.ennemies = encounter.ennemies
+      combat.ennemies = game.current_mission.not_nil!.encounter.ennemies
       combat_panel.combat = combat
 
       combat_actions = elements.by_id("combat-actions").as(Obscura::CombatActionsSelector)

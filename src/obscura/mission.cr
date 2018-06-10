@@ -1,16 +1,20 @@
+require "./encounter"
+
 module Obscura
   class Mission
     DEFAULT_DIFFICULTY = 10
     DEFAULT_NAME = "Unnamed mission"
 
+    @difficulty = DEFAULT_DIFFICULTY
     property :difficulty
+
+    @name = DEFAULT_NAME
     property :name
+
+    @completed = false
     property :completed
 
-    def initialize
-      @name = DEFAULT_NAME
-      @difficulty = DEFAULT_DIFFICULTY
-      @completed = false
-    end
+    @encounter = Obscura::Encounter.new
+    property :encounter
   end
 end
