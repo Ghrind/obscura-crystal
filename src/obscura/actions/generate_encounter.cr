@@ -37,7 +37,7 @@ module Obscura
           weapon.damage_min = 1
           weapon.damage_max = 5
           weapon.hits_per_turn = 3
-          weapon.modes = ["single-shot", "precision-shot", "shootout"]
+          weapon.modes = ["single-shot", "precision-shot", "suppressive-fire"]
           weapon.precision = -10
           weapon.precision_bonus = 10
           ennemy.weapon = weapon

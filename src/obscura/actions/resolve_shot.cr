@@ -3,13 +3,13 @@ require "./../shot_result"
 
 module Obscura
   class ResolveShot
-    def initialize(@actor : Obscura::Fighter, @target : Obscura::Fighter, @mode : String)
+    def initialize(@actor : Obscura::Fighter, @target : Obscura::Fighter, @mode : String, @precision_modificator : Int32 = 0)
     end
 
     def run!() Obscura::ShotResult
       result = Obscura::ShotResult.new
       weapon = @actor.weapon
-      precision = @actor.precision + weapon.precision
+      precision = @actor.precision + weapon.precision + @precision_modificator
       precision += weapon.precision_bonus if @mode == "precision-shot"
 
       result.attacker_name = @actor.name

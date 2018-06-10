@@ -2,6 +2,7 @@ require "./fighter"
 require "./player_order"
 require "./combat_order"
 require "./actions/resolve_shot"
+require "./actions/resolve_suppressive_fire"
 
 module Obscura
   class Combat
@@ -51,8 +52,15 @@ module Obscura
           message += " #{result.shots} times" if result.shots > 1
         end
         return message
-      when "shootout"
-        return "Shootout!"
+      when "suppressive-fire"
+        targets = order.actor == @player ? ennemies_alive : [@player]
+        result = ResolveSuppressiveFire.new(order.actor, targets).run!
+        if result.hits > 0
+          message = "#{result.attacker_name} shoots with #{result.weapon_name} (suppressive-fire) and hits #{result.target_names.join(", ")} for #{result.damages.join(", ")} damages"
+        else
+          message = "#{result.attacker_name} shoots with #{result.weapon_name} and misses"
+        end
+        return message
       when "flee"
         @player_flees = true
         return "Player tries to flee!"

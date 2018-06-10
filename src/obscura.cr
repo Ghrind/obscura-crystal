@@ -101,7 +101,7 @@ app.bind("missions-menu", "keypress.enter") do |event_hub, _, elements, _|
         player.name = "Player"
         weapon = Obscura::Weapon.new
         weapon.name = "Assault rifle"
-        weapon.modes = ["burst", "precision-shot", "shootout"]
+        weapon.modes = ["burst", "precision-shot", "suppressive-fire"]
         weapon.damage_min = 5
         weapon.damage_max = 15
         weapon.precision = 0
@@ -117,7 +117,7 @@ app.bind("missions-menu", "keypress.enter") do |event_hub, _, elements, _|
       combat_orders.available_orders = [
         Obscura::CombatOrderTemplate.new("b", "burst", true),
         Obscura::CombatOrderTemplate.new("p", "precision-shot", true),
-        Obscura::CombatOrderTemplate.new("s", "shootout"),
+        Obscura::CombatOrderTemplate.new("s", "suppressive-fire"),
         Obscura::CombatOrderTemplate.new("w", "wait"),
         Obscura::CombatOrderTemplate.new("f", "flee"),
       ]
