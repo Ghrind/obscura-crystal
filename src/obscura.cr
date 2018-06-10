@@ -149,7 +149,7 @@ combat_orders = Obscura::CombatOrdersSelector.new("combat-orders", {
   :label => "Combat orders",
   :visible => "false",
   :position => "12:0",
-  :width => "60",
+  :width => "90",
 })
 app.add_element(combat_orders)
 
