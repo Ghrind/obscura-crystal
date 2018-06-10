@@ -9,6 +9,7 @@ require "./obscura/actions/start_mission"
 require "./obscura/actions/win_current_mission"
 require "./obscura/actions/cancel_current_mission"
 require "./obscura/actions/generate_missions"
+require "./obscura/actions/generate_encounter"
 require "./obscura/elements/missions_list"
 require "./obscura/elements/combat_actions_selector"
 require "./obscura/elements/combat_positions"
@@ -93,23 +94,30 @@ app.bind("missions-menu", "keypress.enter") do |event_hub, _, elements, _|
     result = Obscura::StartMission.new(game, menu.selected.not_nil!).run!
     if result
       app.game_message("Starting mission \"#{game.current_mission.not_nil!.name}\"")
+
+      combat_panel = elements.by_id("combat-panel").as(Obscura::CombatPositions)
+      combat = Obscura::Combat.new
+      encounter = Obscura::GenerateEncounter.new.run!
+      combat.ennemies = encounter.ennemies
+      combat_panel.combat = combat
+
+      combat_actions = elements.by_id("combat-actions").as(Obscura::CombatActionsSelector)
+      combat_actions.available_actions = [
+        Obscura::CombatAction.new("a", "Attack", true),
+        Obscura::CombatAction.new("w", "Wait"),
+        Obscura::CombatAction.new("f", "Flee"),
+      ]
+      combat_actions.available_targets = (1..combat.ennemies.size).map { |i| i.to_s }
+
       elements.by_id("missions-menu").hide
-      elements.by_id("combat-panel").show
-      elements.by_id("combat-actions").show
+      combat_panel.show
+      combat_actions.show
       event_hub.focus("combat-actions")
     else
       app.game_message("You cannot start a mission that is already completed.")
     end
   end
   false
-end
-
-combat = Obscura::Combat.new
-
-(rand(8) + 1).times do
-  ennemy = Obscura::Fighter.new
-  ennemy.name = Obscura::GameMod.random_ennemy_type
-  combat.ennemies << ennemy
 end
 
 # Combat Panel
@@ -120,7 +128,6 @@ combat_panel = Obscura::CombatPositions.new("combat-panel", {
   :position => "0:30",
   :width => "30",
 })
-combat_panel.combat = combat
 app.add_element(combat_panel)
 
 # Combat Actions Selector
@@ -131,14 +138,6 @@ combat_actions = Obscura::CombatActionsSelector.new("combat-actions", {
   :width => "60",
 })
 app.add_element(combat_actions)
-
-combat_actions.available_actions = [
-  Obscura::CombatAction.new("a", "Attack", true),
-  Obscura::CombatAction.new("w", "Wait"),
-  Obscura::CombatAction.new("f", "Flee"),
-]
-
-combat_actions.available_targets = (1..combat.ennemies.size).map { |i| i.to_s }
 
 app.bind("combat-actions.complete") do |event_hub, _, elements, _|
   actions = elements.by_id("combat-actions").as(Obscura::CombatActionsSelector)
