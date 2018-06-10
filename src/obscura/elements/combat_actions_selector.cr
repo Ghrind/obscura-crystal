@@ -1,22 +1,20 @@
 require "hydra"
 require "./../combat_action"
+require "./../player_action"
 
 module Obscura
   class CombatActionsSelector < Hydra::Text
+    @available_actions = Array(CombatAction).new
     property :available_actions
-    property :available_targets
-    property :current_action
-    property :current_target
-    @current_action : CombatAction | Nil
-    @current_target : String | Nil
 
-    def initialize(id : String, options = Hash(Symbol, String).new)
-      super
-      @available_actions = Array(CombatAction).new
-      @available_targets = Array(String).new
-      @current_action = nil
-      @current_target = nil
-    end
+    @available_targets = Array(String).new
+    property :available_targets
+
+    @player_action = Obscura::PlayerAction.new
+    getter :player_action
+
+    @current_action : Obscura::CombatAction | Nil
+    @current_action = nil
 
     def content
       if ready?
@@ -33,12 +31,12 @@ module Obscura
       action = @current_action
       return false unless action
       return true unless action.require_target
-      !@current_target.nil?
+      !player_action.target.nil?
     end
 
     def reset!
       @current_action = nil
-      @current_target = nil
+      @player_action = PlayerAction.new
     end
 
     def on_register(event_hub : Hydra::EventHub)
@@ -46,12 +44,13 @@ module Obscura
         char = event.keypress.not_nil!.char
         if action = @current_action
           if action.require_target && @available_targets.includes?(char)
-            @current_target = char
+            @player_action.target = char
           end
         else
           action = @available_actions.find { |action| action.shortcut == char }
           if action
             @current_action = action
+            @player_action.name = action.name
           end
         end
         event_hub.broadcast(Hydra::Event.new("combat-actions.complete"), state, elements) if ready?

@@ -138,11 +138,27 @@ combat_actions = Obscura::CombatActionsSelector.new("combat-actions", {
 })
 app.add_element(combat_actions)
 
-app.bind("combat-actions.complete") do |event_hub, _, elements, _|
-  actions = elements.by_id("combat-actions").as(Obscura::CombatActionsSelector)
-  combat = game.current_combat.not_nil!
-  combat.process_action(actions.current_action.not_nil!, actions.current_target)
+combat_unroller = Hydra::Element.new("combat-unroller", {
+  :visible => "false"
+})
+app.add_element(combat_unroller)
 
+app.bind("combat-unroller", "keypress. ") do |event_hub, _, elements, state|
+  combat = game.current_combat.not_nil!
+  if combat.turn_completed?
+    event_hub.broadcast(Hydra::Event.new("combat-actions.turn_complete"), state, elements)
+  else
+    result = combat.unroll!
+    app.game_message(result)
+  end
+  true
+end
+
+app.bind("combat-actions.turn_complete") do |event_hub, _, elements|
+  actions = elements.by_id("combat-actions").as(Obscura::CombatActionsSelector)
+  actions.reset!
+
+  combat = game.current_combat.not_nil!
   case game.current_combat.not_nil!.status
   when :player_wins
     app.game_message("Victory!")
@@ -163,8 +179,16 @@ app.bind("combat-actions.complete") do |event_hub, _, elements, _|
     event_hub.focus("missions-menu")
   when :ongoing
     actions.available_targets = combat.identifiers(combat.ennemies_alive)
+    event_hub.focus("combat-actions")
   end
-  actions.reset!
+  true
+end
+
+app.bind("combat-actions.complete") do |event_hub, _, elements, _|
+  actions = elements.by_id("combat-actions").as(Obscura::CombatActionsSelector)
+  combat = game.current_combat.not_nil!
+  combat.process_turn(actions.player_action)
+  event_hub.focus("combat-unroller")
   true
 end
 
