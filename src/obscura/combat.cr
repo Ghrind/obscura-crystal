@@ -17,7 +17,8 @@ module Obscura
     def prepare_turn(order : Obscura::PlayerOrder)
       @turn_orders << Obscura::CombatOrder.new(@player, order.name, ennemy_at(order.target))
       ennemies_alive.each do |ennemy|
-        @turn_orders << Obscura::CombatOrder.new(ennemy, "Attack", @player)
+        action = ennemy.weapon.modes.sample
+        @turn_orders << Obscura::CombatOrder.new(ennemy, action, @player)
       end
     end
 
@@ -37,29 +38,43 @@ module Obscura
         return "#{order.actor.name} is dead and cannot do anything..."
       end
       case order.name
-      when "Attack"
+      when "single-shot", "precision-shot", "burst"
         actor = order.actor
         weapon = order.actor.weapon
         target = order.target.not_nil!
         precision = actor.precision + weapon.precision
-        result = "#{actor.name} attacks #{target.name} with #{weapon.name}"
+        precision += weapon.precision_bonus if order.name == "precision-shot"
+        result = "#{actor.name} attacks #{target.name} with #{weapon.name} (#{order.name})"
 
-        roll = Random.rand(100) + 1
-        if roll <= precision
-          result += " and hits (#{roll}/#{precision})"
-          damage = Random.rand(weapon.damage_max - weapon.damage_min) + weapon.damage_min
+        shots = order.name == "burst" ? weapon.hits_per_turn : 1
+        hits = 0
+
+        shots.times do
+          roll = Random.rand(100) + 1
+          if roll <= precision
+            hits += 1
+          end
+        end
+        if hits > 0
+          result += " and hits #{hits} times"
+          damage = 0
+          hits.times do
+            damage += Random.rand(weapon.damage_max - weapon.damage_min) + weapon.damage_min
+          end
           target.hit_points -= damage
           target.hit_points = 0 if target.hit_points < 0
           result += " for #{damage} damage"
         else
-          result += " and misses (#{roll}/#{precision})"
+          result += " and misses #{shots} times"
         end
 
         return result
-      when "Flee"
+      when "shootout"
+        return "Shootout!"
+      when "flee"
         @player_flees = true
         return "Player tries to flee!"
-      when "Wait"
+      when "wait"
         return "Player waits..."
       else
         return "An unexpected order has been queued..."

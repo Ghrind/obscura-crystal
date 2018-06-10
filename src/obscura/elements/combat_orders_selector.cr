@@ -22,7 +22,9 @@ module Obscura
       elsif (order = @current_order_template) && order.require_target
         @value = "Target? #{@available_targets.join(", ")}"
       else
-        @value = @available_orders.map { |order| order.name }.join(", ") + "?"
+        @value = @available_orders.map do |order|
+          order.name.sub(order.shortcut, "(#{order.shortcut.upcase})")
+        end.join(", ") + "?"
       end
       super
     end

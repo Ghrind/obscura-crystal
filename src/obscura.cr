@@ -101,12 +101,12 @@ app.bind("missions-menu", "keypress.enter") do |event_hub, _, elements, _|
         player.name = "Player"
         weapon = Obscura::Weapon.new
         weapon.name = "Assault rifle"
-        #weapon.modes = ["single_shot", "precision_shot", "shootout"]
+        weapon.modes = ["burst", "precision-shot", "shootout"]
         weapon.damage_min = 5
         weapon.damage_max = 15
         weapon.precision = 0
-        #weapon.precision_bonus = 15
-        #weapon.hits_per_turn = 3
+        weapon.precision_bonus = 15
+        weapon.hits_per_turn = 3
         player.weapon = weapon
         player.hit_points = 100
       end
@@ -115,9 +115,11 @@ app.bind("missions-menu", "keypress.enter") do |event_hub, _, elements, _|
 
       combat_orders = elements.by_id("combat-orders").as(Obscura::CombatOrdersSelector)
       combat_orders.available_orders = [
-        Obscura::CombatOrderTemplate.new("a", "Attack", true),
-        Obscura::CombatOrderTemplate.new("w", "Wait"),
-        Obscura::CombatOrderTemplate.new("f", "Flee"),
+        Obscura::CombatOrderTemplate.new("b", "burst", true),
+        Obscura::CombatOrderTemplate.new("p", "precision-shot", true),
+        Obscura::CombatOrderTemplate.new("s", "shootout"),
+        Obscura::CombatOrderTemplate.new("w", "wait"),
+        Obscura::CombatOrderTemplate.new("f", "flee"),
       ]
       combat_orders.available_targets = combat.identifiers(combat.ennemies)
 

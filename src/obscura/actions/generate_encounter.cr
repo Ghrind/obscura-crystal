@@ -14,10 +14,10 @@ module Obscura
           weapon.name = "Sniper rifle"
           weapon.damage_min = 8
           weapon.damage_max = 12
-          #weapon.hits_per_turn = 1
-          #weapon.modes = ["single_shot", "precision_shot"]
+          weapon.hits_per_turn = 1
+          weapon.modes = ["single-shot", "precision-shot"]
           weapon.precision = -30
-          #weapon.precision_bonus = 50
+          weapon.precision_bonus = 50
           ennemy.weapon = weapon
         when "Cybermaw"
           ennemy.hit_points = 10
@@ -25,10 +25,10 @@ module Obscura
           weapon.name = "Shotgun"
           weapon.damage_min = 2
           weapon.damage_max = 12
-          #weapon.hits_per_turn = 1
-          #weapon.modes = ["single_shot"]
+          weapon.hits_per_turn = 1
+          weapon.modes = ["single-shot"]
           weapon.precision = -20
-          #weapon.precision_bonus = 0
+          weapon.precision_bonus = 0
           ennemy.weapon = weapon
         when "Agressor"
           ennemy.hit_points = 6
@@ -36,10 +36,10 @@ module Obscura
           weapon.name = "Machinegun"
           weapon.damage_min = 1
           weapon.damage_max = 5
-          #weapon.hits_per_turn = 3
-          #weapon.modes = ["single_shot", "precision_shot", "shootout"]
+          weapon.hits_per_turn = 3
+          weapon.modes = ["single-shot", "precision-shot", "shootout"]
           weapon.precision = -10
-          #weapon.precision_bonus = 10
+          weapon.precision_bonus = 10
           ennemy.weapon = weapon
         else
         end
