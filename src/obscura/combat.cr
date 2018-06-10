@@ -38,13 +38,24 @@ module Obscura
       end
       case order.name
       when "Attack"
-        if order.actor == @player
-          ennemy = order.target.not_nil!
-          ennemy.dead = true
-          return "Player attacks #{ennemy.name} and kills it"
+        actor = order.actor
+        weapon = order.actor.weapon
+        target = order.target.not_nil!
+        precision = actor.precision + weapon.precision
+        result = "#{actor.name} attacks #{target.name} with #{weapon.name}"
+
+        roll = Random.rand(100) + 1
+        if roll <= precision
+          result += " and hits (#{roll}/#{precision})"
+          damage = Random.rand(weapon.damage_max - weapon.damage_min) + weapon.damage_min
+          target.hit_points -= damage
+          target.hit_points = 0 if target.hit_points < 0
+          result += " for #{damage} damage"
         else
-          return "#{order.actor.name} attacks player and hits!"
+          result += " and misses (#{roll}/#{precision})"
         end
+
+        return result
       when "Flee"
         @player_flees = true
         return "Player tries to flee!"

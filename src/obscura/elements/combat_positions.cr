@@ -21,7 +21,8 @@ module Obscura
       1.upto(8) do |n|
         i = n - 1
         if @combat.ennemies[i]?
-          string = "#{n}. #{@combat.ennemies[i].name}"
+          ennemy = @combat.ennemies[i]
+          string = "#{n}. #{ennemy.name} #{ennemy.hit_points}"
           string = "<red-fg>#{string}</red-fg>" if @combat.ennemies[i].dead
           rows[i] += string
         else

@@ -1,15 +1,27 @@
+require "./weapon"
+
 module Obscura
   class Fighter
     DEFAULT_LEVEL = 1
     DEFAULT_NAME = "Unidentified fighter"
 
-    @level = DEFAULT_LEVEL
-    property :level
+    #@level = DEFAULT_LEVEL
+    #property :level
 
     @name = DEFAULT_NAME
     property :name
 
-    @dead = false
-    property :dead
+    @precision = 50 # Ability to hit a target with a ranged weapon
+    property :precision
+
+    @weapon = Obscura::Weapon.new
+    property :weapon
+
+    @hit_points = 30
+    property :hit_points
+
+    def dead
+      @hit_points <= 0
+    end
   end
 end

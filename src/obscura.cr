@@ -97,6 +97,19 @@ app.bind("missions-menu", "keypress.enter") do |event_hub, _, elements, _|
       combat_panel = elements.by_id("combat-panel").as(Obscura::CombatPositions)
       combat = Obscura::Combat.new
       combat.ennemies = game.current_mission.not_nil!.encounter.ennemies
+      combat.player = Obscura::Fighter.new.tap do |player|
+        player.name = "Player"
+        weapon = Obscura::Weapon.new
+        weapon.name = "Assault rifle"
+        #weapon.modes = ["single_shot", "precision_shot", "shootout"]
+        weapon.damage_min = 5
+        weapon.damage_max = 15
+        weapon.precision = 0
+        #weapon.precision_bonus = 15
+        #weapon.hits_per_turn = 3
+        player.weapon = weapon
+        player.hit_points = 100
+      end
       game.current_combat = combat
       combat_panel.combat = combat
 
