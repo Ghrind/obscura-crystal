@@ -1,6 +1,6 @@
 module Obscura
-  class PlayerAction
-    @name = "no action"
+  class PlayerOrder
+    @name = "no order"
     property :name
 
     @target : String | Nil

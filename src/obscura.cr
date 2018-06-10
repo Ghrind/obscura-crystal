@@ -4,13 +4,13 @@ require "./obscura/game"
 require "./obscura/mission"
 require "./obscura/mission_result"
 require "./obscura/combat"
-require "./obscura/combat_action"
+require "./obscura/combat_order_template"
 require "./obscura/actions/start_mission"
 require "./obscura/actions/win_current_mission"
 require "./obscura/actions/cancel_current_mission"
 require "./obscura/actions/generate_missions"
 require "./obscura/elements/missions_list"
-require "./obscura/elements/combat_actions_selector"
+require "./obscura/elements/combat_orders_selector"
 require "./obscura/elements/combat_positions"
 
 app = Obscura::Application.setup
@@ -100,18 +100,18 @@ app.bind("missions-menu", "keypress.enter") do |event_hub, _, elements, _|
       game.current_combat = combat
       combat_panel.combat = combat
 
-      combat_actions = elements.by_id("combat-actions").as(Obscura::CombatActionsSelector)
-      combat_actions.available_actions = [
-        Obscura::CombatAction.new("a", "Attack", true),
-        Obscura::CombatAction.new("w", "Wait"),
-        Obscura::CombatAction.new("f", "Flee"),
+      combat_orders = elements.by_id("combat-orders").as(Obscura::CombatOrdersSelector)
+      combat_orders.available_orders = [
+        Obscura::CombatOrderTemplate.new("a", "Attack", true),
+        Obscura::CombatOrderTemplate.new("w", "Wait"),
+        Obscura::CombatOrderTemplate.new("f", "Flee"),
       ]
-      combat_actions.available_targets = combat.identifiers(combat.ennemies)
+      combat_orders.available_targets = combat.identifiers(combat.ennemies)
 
       elements.by_id("missions-menu").hide
       combat_panel.show
-      combat_actions.show
-      event_hub.focus("combat-actions")
+      combat_orders.show
+      event_hub.focus("combat-orders")
     else
       app.game_message("You cannot start a mission that is already completed.")
     end
@@ -129,14 +129,14 @@ combat_panel = Obscura::CombatPositions.new("combat-panel", {
 })
 app.add_element(combat_panel)
 
-# Combat Actions Selector
-combat_actions = Obscura::CombatActionsSelector.new("combat-actions", {
-  :label => "Combat actions",
+# Combat Orders Selector
+combat_orders = Obscura::CombatOrdersSelector.new("combat-orders", {
+  :label => "Combat orders",
   :visible => "false",
   :position => "12:0",
   :width => "60",
 })
-app.add_element(combat_actions)
+app.add_element(combat_orders)
 
 combat_unroller = Hydra::Element.new("combat-unroller", {
   :visible => "false"
@@ -146,7 +146,7 @@ app.add_element(combat_unroller)
 app.bind("combat-unroller", "keypress. ") do |event_hub, _, elements, state|
   combat = game.current_combat.not_nil!
   if combat.turn_completed?
-    event_hub.broadcast(Hydra::Event.new("combat-actions.turn_complete"), state, elements)
+    event_hub.broadcast(Hydra::Event.new("combat-orders.turn_complete"), state, elements)
   else
     result = combat.unroll!
     app.game_message(result)
@@ -154,9 +154,9 @@ app.bind("combat-unroller", "keypress. ") do |event_hub, _, elements, state|
   true
 end
 
-app.bind("combat-actions.turn_complete") do |event_hub, _, elements|
-  actions = elements.by_id("combat-actions").as(Obscura::CombatActionsSelector)
-  actions.reset!
+app.bind("combat-orders.turn_complete") do |event_hub, _, elements|
+  orders = elements.by_id("combat-orders").as(Obscura::CombatOrdersSelector)
+  orders.reset!
 
   combat = game.current_combat.not_nil!
   case game.current_combat.not_nil!.status
@@ -178,16 +178,16 @@ app.bind("combat-actions.turn_complete") do |event_hub, _, elements|
     elements.show_only("missions-menu", "game-info", "messages")
     event_hub.focus("missions-menu")
   when :ongoing
-    actions.available_targets = combat.identifiers(combat.ennemies_alive)
-    event_hub.focus("combat-actions")
+    orders.available_targets = combat.identifiers(combat.ennemies_alive)
+    event_hub.focus("combat-orders")
   end
   true
 end
 
-app.bind("combat-actions.complete") do |event_hub, _, elements, _|
-  actions = elements.by_id("combat-actions").as(Obscura::CombatActionsSelector)
+app.bind("combat-orders.complete") do |event_hub, _, elements, _|
+  orders = elements.by_id("combat-orders").as(Obscura::CombatOrdersSelector)
   combat = game.current_combat.not_nil!
-  combat.process_turn(actions.player_action)
+  combat.process_turn(orders.player_order)
   event_hub.focus("combat-unroller")
   true
 end

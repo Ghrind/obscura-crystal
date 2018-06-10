@@ -10,31 +10,31 @@ module Obscura
 
     @player_flees = false
 
-    @turn_actions = Array(String).new
+    @turn_orders = Array(String).new
 
-    def process_turn(action : Obscura::PlayerAction)
-      case action.name
+    def process_turn(order : Obscura::PlayerOrder)
+      case order.name
       when "Attack"
-        ennemy = @ennemies[action.target.not_nil!.to_i - 1]
+        ennemy = @ennemies[order.target.not_nil!.to_i - 1]
         ennemy.dead = true
-        @turn_actions << "Player attacks #{ennemy.name} and kills it"
+        @turn_orders << "Player attacks #{ennemy.name} and kills it"
       when "Flee"
         @player_flees = true
-        @turn_actions << "Player flees"
+        @turn_orders << "Player flees"
       when "Wait"
         # Nothing
       end
       ennemies_alive.each do |ennemy|
-        @turn_actions << "#{ennemy.name} attacks player and hits!"
+        @turn_orders << "#{ennemy.name} attacks player and hits!"
       end
     end
 
     def turn_completed?
-      @turn_actions.empty?
+      @turn_orders.empty?
     end
 
     def unroll!
-      @turn_actions.shift
+      @turn_orders.shift
     end
 
     def status
