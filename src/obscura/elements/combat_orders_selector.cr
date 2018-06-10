@@ -53,6 +53,9 @@ module Obscura
           if order
             @current_order_template = order
             @player_order.name = order.name
+            if order.require_target && @available_targets.size == 1
+              @player_order.target = @available_targets.first
+            end
           end
         end
         event_hub.broadcast(Hydra::Event.new("combat-orders.complete"), state, elements) if ready?
