@@ -55,6 +55,8 @@ end
 
 app.add_element({
   :id => "game-info",
+  :height => "12",
+  :label => "Game Info",
   :type => "text",
   :template => "Reputation: {{game.reputation}}\nPlayer level: {{game.player_level}}",
   :visible => "false",
@@ -66,8 +68,9 @@ app.add_element({
 missions_menu = Obscura::MissionsList.new("missions-menu", {
   :height => "12",
   :position => "center",
-  :width => "24",
+  :width => "29",
   :label => "Select a mission",
+  :position => "0:30",
   :visible => "false",
 })
 app.add_element(missions_menu)
@@ -107,20 +110,21 @@ combat_positions = "    \n" \
 # Combat Panel
 app.add_element({
   :id => "combat-panel",
+  :height => "12",
   :type => "text",
   :label => "Combat",
   :value => combat_positions,
   :visible => "false",
-  :position => "center",
-  :autosize => "true",
+  :position => "0:30",
+  :width => "30",
 })
 
 # Combat Actions Selector
 combat_actions = Obscura::CombatActionsSelector.new("combat-actions", {
   :label => "Combat actions",
   :visible => "false",
-  :position => "0:30",
-  :width => "35",
+  :position => "12:0",
+  :width => "60",
 })
 app.add_element(combat_actions)
 
@@ -165,8 +169,8 @@ app.add_element({
   :type => "logbox",
   :visible => "false",
   :label => "Messages",
-  :position => "8:0",
-  :width => "100",
+  :position => "15:0",
+  :width => "90",
 })
 
 # Winning screen
