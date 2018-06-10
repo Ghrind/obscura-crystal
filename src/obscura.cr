@@ -151,7 +151,7 @@ app.bind("combat-unroller", "keypress. ") do |event_hub, _, elements, state|
     result = combat.unroll!
     app.game_message(result)
   end
-  true
+  false
 end
 
 app.bind("combat-orders.turn_complete") do |event_hub, _, elements|
