@@ -3,6 +3,7 @@ require "./obscura/application"
 require "./obscura/game"
 require "./obscura/mission"
 require "./obscura/mission_result"
+require "./obscura/combat"
 require "./obscura/combat_action"
 require "./obscura/actions/start_mission"
 require "./obscura/actions/win_current_mission"
@@ -10,6 +11,7 @@ require "./obscura/actions/cancel_current_mission"
 require "./obscura/actions/generate_missions"
 require "./obscura/elements/missions_list"
 require "./obscura/elements/combat_actions_selector"
+require "./obscura/elements/combat_positions"
 
 app = Obscura::Application.setup
 game = app.game
@@ -102,22 +104,24 @@ app.bind("missions-menu", "keypress.enter") do |event_hub, _, elements, _|
   false
 end
 
-combat_positions = "    \n" \
-                   " 1A \n" \
-                   "    \n" \
-                   "    \n" \
+combat = Obscura::Combat.new
+
+(rand(8) + 1).times do
+  ennemy = Obscura::Fighter.new
+  ennemy.name = Obscura::GameMod.random_ennemy_type
+  combat.ennemies << ennemy
+end
 
 # Combat Panel
-app.add_element({
-  :id => "combat-panel",
+combat_panel = Obscura::CombatPositions.new("combat-panel", {
   :height => "12",
-  :type => "text",
   :label => "Combat",
-  :value => combat_positions,
   :visible => "false",
   :position => "0:30",
   :width => "30",
 })
+combat_panel.combat = combat
+app.add_element(combat_panel)
 
 # Combat Actions Selector
 combat_actions = Obscura::CombatActionsSelector.new("combat-actions", {
@@ -134,7 +138,7 @@ combat_actions.available_actions = [
   Obscura::CombatAction.new("f", "Flee"),
 ]
 
-combat_actions.available_targets = ["1"]
+combat_actions.available_targets = (1..combat.ennemies.size).map { |i| i.to_s }
 
 app.bind("combat-actions.complete") do |event_hub, _, elements, _|
   actions = elements.by_id("combat-actions").as(Obscura::CombatActionsSelector)

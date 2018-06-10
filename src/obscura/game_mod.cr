@@ -37,5 +37,15 @@ module Obscura
         [MISSION_NAME_PREFIX.sample, MISSION_NAME_TYPES.sample].join(" ")
       end
     end
+
+    ENNEMY_TYPES = [
+      "Cybermaw",
+      "Agressor",
+      "Violator",
+    ]
+
+    def self.random_ennemy_type() String
+      ENNEMY_TYPES.sample
+    end
   end
 end
