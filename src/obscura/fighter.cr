@@ -20,6 +20,9 @@ module Obscura
     @hit_points = 30
     property :hit_points
 
+    @damage_reduction = 0
+    property :damage_reduction
+
     def dead
       @hit_points <= 0
     end

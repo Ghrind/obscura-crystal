@@ -1,6 +1,7 @@
 require "./fighter"
 require "./player_order"
 require "./combat_order"
+require "./actions/resolve_shot"
 
 module Obscura
   class Combat
@@ -39,36 +40,17 @@ module Obscura
       end
       case order.name
       when "single-shot", "precision-shot", "burst"
-        actor = order.actor
-        weapon = order.actor.weapon
-        target = order.target.not_nil!
-        precision = actor.precision + weapon.precision
-        precision += weapon.precision_bonus if order.name == "precision-shot"
-        result = "#{actor.name} attacks #{target.name} with #{weapon.name} (#{order.name})"
-
-        shots = order.name == "burst" ? weapon.hits_per_turn : 1
-        hits = 0
-
-        shots.times do
-          roll = Random.rand(100) + 1
-          if roll <= precision
-            hits += 1
-          end
-        end
-        if hits > 0
-          result += " and hits #{hits} times"
-          damage = 0
-          hits.times do
-            damage += Random.rand(weapon.damage_max - weapon.damage_min) + weapon.damage_min
-          end
-          target.hit_points -= damage
-          target.hit_points = 0 if target.hit_points < 0
-          result += " for #{damage} damage"
+        result = Obscura::ResolveShot.new(order.actor, order.target.not_nil!, order.name).run!
+        message = "#{result.attacker_name} attacks #{result.target_name} with #{result.weapon_name} (#{result.attack_mode})"
+        if result.hits > 0
+          message += " and hits"
+          message += " #{result.hits} times" if result.shots > 1
+          message += " for #{result.damage} damage"
         else
-          result += " and misses #{shots} times"
+          message += " and misses"
+          message += " #{result.shots} times" if result.shots > 1
         end
-
-        return result
+        return message
       when "shootout"
         return "Shootout!"
       when "flee"
