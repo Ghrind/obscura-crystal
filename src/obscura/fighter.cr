@@ -8,5 +8,8 @@ module Obscura
 
     @name = DEFAULT_NAME
     property :name
+
+    @dead = false
+    property :dead
   end
 end

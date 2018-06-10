@@ -97,6 +97,7 @@ app.bind("missions-menu", "keypress.enter") do |event_hub, _, elements, _|
       combat_panel = elements.by_id("combat-panel").as(Obscura::CombatPositions)
       combat = Obscura::Combat.new
       combat.ennemies = game.current_mission.not_nil!.encounter.ennemies
+      game.current_combat = combat
       combat_panel.combat = combat
 
       combat_actions = elements.by_id("combat-actions").as(Obscura::CombatActionsSelector)
@@ -105,7 +106,7 @@ app.bind("missions-menu", "keypress.enter") do |event_hub, _, elements, _|
         Obscura::CombatAction.new("w", "Wait"),
         Obscura::CombatAction.new("f", "Flee"),
       ]
-      combat_actions.available_targets = (1..combat.ennemies.size).map { |i| i.to_s }
+      combat_actions.available_targets = combat.identifiers(combat.ennemies)
 
       elements.by_id("missions-menu").hide
       combat_panel.show
@@ -139,9 +140,12 @@ app.add_element(combat_actions)
 
 app.bind("combat-actions.complete") do |event_hub, _, elements, _|
   actions = elements.by_id("combat-actions").as(Obscura::CombatActionsSelector)
-  case actions.current_action.not_nil!.name
-  when "Attack"
-    app.game_message("Player attacks and kills the opponent")
+  combat = game.current_combat.not_nil!
+  combat.process_action(actions.current_action.not_nil!, actions.current_target)
+
+  case game.current_combat.not_nil!.status
+  when :player_wins
+    app.game_message("Victory!")
     result = Obscura::WinCurrentMission.new(game).run!
     app.game_message("Mission completed \"#{result.mission_name}\".")
 
@@ -152,13 +156,13 @@ app.bind("combat-actions.complete") do |event_hub, _, elements, _|
       elements.show_only("missions-menu", "game-info", "messages")
       event_hub.focus("missions-menu")
     end
-  when "Flee"
+  when :player_flees
     app.game_message("Player has fled")
     Obscura::CancelCurrentMission.new(game).run!
     elements.show_only("missions-menu", "game-info", "messages")
     event_hub.focus("missions-menu")
-  when "Wait"
-    app.game_message("Player waits and is attacked")
+  when :ongoing
+    actions.available_targets = combat.identifiers(combat.ennemies_alive)
   end
   actions.reset!
   true
