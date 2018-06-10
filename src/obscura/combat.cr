@@ -1,4 +1,6 @@
 require "./fighter"
+require "./player_order"
+require "./combat_order"
 
 module Obscura
   class Combat
@@ -10,31 +12,47 @@ module Obscura
 
     @player_flees = false
 
-    @turn_orders = Array(String).new
+    @turn_orders = Array(CombatOrder).new
 
-    def process_turn(order : Obscura::PlayerOrder)
-      case order.name
-      when "Attack"
-        ennemy = @ennemies[order.target.not_nil!.to_i - 1]
-        ennemy.dead = true
-        @turn_orders << "Player attacks #{ennemy.name} and kills it"
-      when "Flee"
-        @player_flees = true
-        @turn_orders << "Player flees"
-      when "Wait"
-        # Nothing
-      end
+    def prepare_turn(order : Obscura::PlayerOrder)
+      @turn_orders << Obscura::CombatOrder.new(@player, order.name, ennemy_at(order.target))
       ennemies_alive.each do |ennemy|
-        @turn_orders << "#{ennemy.name} attacks player and hits!"
+        @turn_orders << Obscura::CombatOrder.new(ennemy, "Attack", @player)
       end
+    end
+
+    def ennemy_at(identifier : String | Nil)
+      return nil unless identifier
+      index = identifier.to_i - 1
+      @ennemies[index]? ? @ennemies[index] : nil
     end
 
     def turn_completed?
       @turn_orders.empty?
     end
 
-    def unroll!
-      @turn_orders.shift
+    def unroll!() : String
+      order = @turn_orders.shift
+      if order.actor.dead
+        return "#{order.actor.name} is dead and cannot do anything..."
+      end
+      case order.name
+      when "Attack"
+        if order.actor == @player
+          ennemy = order.target.not_nil!
+          ennemy.dead = true
+          return "Player attacks #{ennemy.name} and kills it"
+        else
+          return "#{order.actor.name} attacks player and hits!"
+        end
+      when "Flee"
+        @player_flees = true
+        return "Player tries to flee!"
+      when "Wait"
+        return "Player waits..."
+      else
+        return "An unexpected order has been queued..."
+      end
     end
 
     def status

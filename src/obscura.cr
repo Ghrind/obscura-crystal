@@ -187,7 +187,7 @@ end
 app.bind("combat-orders.complete") do |event_hub, _, elements, _|
   orders = elements.by_id("combat-orders").as(Obscura::CombatOrdersSelector)
   combat = game.current_combat.not_nil!
-  combat.process_turn(orders.player_order)
+  combat.prepare_turn(orders.player_order)
   event_hub.focus("combat-unroller")
   true
 end
