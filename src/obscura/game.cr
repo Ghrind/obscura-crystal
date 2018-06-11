@@ -1,18 +1,17 @@
 require "./mission"
 require "./combat"
+require "./fighter"
 
 module Obscura
   class Game
     INITIAL_REPUTATION = 0
     MAXIMUM_REPUTATION = 100
 
-    INITIAL_PLAYER_LEVEL = 1
-
     @reputation = INITIAL_REPUTATION
     property :reputation
 
-    @player_level = INITIAL_PLAYER_LEVEL
-    property :player_level
+    @player = Obscura::Fighter.new
+    property :player
 
     @missions = Array(Obscura::Mission).new
     property :missions

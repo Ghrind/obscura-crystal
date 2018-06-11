@@ -12,10 +12,25 @@ require "./obscura/actions/generate_missions"
 require "./obscura/elements/missions_list"
 require "./obscura/elements/combat_orders_selector"
 require "./obscura/elements/combat_positions"
+require "./obscura/elements/game_info"
 
 app = Obscura::Application.setup
 game = app.game
 Obscura::GenerateMissions.new(game).run!
+
+game.player = Obscura::Fighter.new.tap do |player|
+  player.name = "Player"
+  weapon = Obscura::Weapon.new
+  weapon.name = "Assault rifle"
+  weapon.modes = ["burst", "precision-shot", "suppressive-fire"]
+  weapon.damage_min = 5
+  weapon.damage_max = 15
+  weapon.precision = 0
+  weapon.precision_bonus = 15
+  weapon.hits_per_turn = 3
+  player.weapon = weapon
+  player.hit_points = 100
+end
 
 # Main menu
 
@@ -54,16 +69,14 @@ app.bind("main-menu", "keypress.enter") do |event_hub, _, elements, _|
 end
 
 # Game info
-
-app.add_element({
-  :id => "game-info",
+game_info = Obscura::GameInfo.new("game-info", {
   :height => "12",
   :label => "Game Info",
-  :type => "text",
-  :template => "Reputation: {{game.reputation}}\nPlayer level: {{game.player_level}}",
   :visible => "false",
   :width => "30",
 })
+game_info.game = game
+app.add_element(game_info)
 
 # Missions menu
 
@@ -97,19 +110,7 @@ app.bind("missions-menu", "keypress.enter") do |event_hub, _, elements, _|
       combat_panel = elements.by_id("combat-panel").as(Obscura::CombatPositions)
       combat = Obscura::Combat.new
       combat.ennemies = game.current_mission.not_nil!.encounter.ennemies
-      combat.player = Obscura::Fighter.new.tap do |player|
-        player.name = "Player"
-        weapon = Obscura::Weapon.new
-        weapon.name = "Assault rifle"
-        weapon.modes = ["burst", "precision-shot", "suppressive-fire"]
-        weapon.damage_min = 5
-        weapon.damage_max = 15
-        weapon.precision = 0
-        weapon.precision_bonus = 15
-        weapon.hits_per_turn = 3
-        player.weapon = weapon
-        player.hit_points = 100
-      end
+      combat.player = game.player
       game.current_combat = combat
       combat_panel.combat = combat
 

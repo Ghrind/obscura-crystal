@@ -9,7 +9,7 @@ module Obscura
       mission = @game.current_mission.not_nil!
       mission.completed = true
       @game.reputation += mission.difficulty
-      @game.player_level += 1
+      @game.player.level += 1
       @game.current_mission = nil
       MissionResult.new(mission.name)
     end
