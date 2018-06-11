@@ -1,10 +1,26 @@
 require "./../encounter"
+require "./../game_mod"
 
 module Obscura
   class GenerateEncounter
+
+    def initialize(@difficulty : Int32)
+    end
+
+    def min_ennemies
+      @difficulty / 20 + 1
+    end
+
+    def max_ennemies
+      [8 - (10 - @difficulty / 10), min_ennemies].max
+    end
+
     def run!() Obscura::Encounter
       encounter = Obscura::Encounter.new
-      (rand(8) + 1).times do
+
+      ennemies_count = rand(max_ennemies - min_ennemies) + min_ennemies
+
+      (ennemies_count).times do
         ennemy = Obscura::Fighter.new
         ennemy.name = Obscura::GameMod.random_ennemy_type
         case ennemy.name

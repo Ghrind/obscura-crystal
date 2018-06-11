@@ -10,7 +10,7 @@ module Obscura
         mission = Obscura::Mission.new
         mission.name = Obscura::GameMod.random_mission_name
         mission.difficulty = (Random.rand(10) + 1) * 10
-        mission.encounter = Obscura::GenerateEncounter.new.run!
+        mission.encounter = Obscura::GenerateEncounter.new(mission.difficulty).run!
         @game.missions.push mission
       end
     end
