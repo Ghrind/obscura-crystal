@@ -163,9 +163,14 @@ app.bind("combat-unroller", "keypress. ") do |event_hub, _, elements, state|
   combat = game.current_combat.not_nil!
   if combat.turn_completed?
     event_hub.broadcast(Hydra::Event.new("combat-orders.turn_complete"), state, elements)
+  elsif game.lost?
+    event_hub.broadcast(Hydra::Event.new("application.game_lost"), state, elements)
   else
     result = combat.unroll!
     app.game_message(result)
+    if game.player.dead
+      app.game_message("#{game.player.name} is dead")
+    end
   end
   false
 end
@@ -200,6 +205,13 @@ app.bind("combat-orders.turn_complete") do |event_hub, _, elements|
   true
 end
 
+app.bind("application.game_lost") do |event_hub, _, elements|
+  elements.hide_all
+  elements.by_id("defeat-screen").show
+  event_hub.focus("defeat-screen")
+  false
+end
+
 app.bind("combat-orders.complete") do |event_hub, _, elements, _|
   orders = elements.by_id("combat-orders").as(Obscura::CombatOrdersSelector)
   combat = game.current_combat.not_nil!
@@ -218,7 +230,7 @@ app.add_element({
   :width => "90",
 })
 
-# Winning screen
+# Victory screen
 app.add_element({
   :id => "winning-screen",
   :position => "center",
@@ -230,6 +242,19 @@ app.add_element({
 })
 
 app.bind("winning-screen", "keypress.*", "application", "stop")
+
+# Defeat screen
+app.add_element({
+  :id => "defeat-screen",
+  :position => "center",
+  :visible => "false",
+  :type => "text",
+  :label => "Victory!",
+  :value => "You have lost the game!",
+  :autosize => "true",
+})
+
+app.bind("defeat-screen", "keypress.*", "application", "stop")
 
 # Application start
 

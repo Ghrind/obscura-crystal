@@ -27,5 +27,9 @@ module Obscura
     def won?
       @reputation >= MAXIMUM_REPUTATION
     end
+
+    def lost?
+      @player.dead
+    end
   end
 end
