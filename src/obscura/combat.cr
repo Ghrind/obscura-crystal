@@ -31,7 +31,7 @@ module Obscura
     end
 
     def turn_completed?
-      @turn_orders.empty?
+      @turn_orders.empty? || ennemies_alive.empty?
     end
 
     def unroll!() : String
