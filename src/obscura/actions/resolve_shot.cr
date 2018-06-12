@@ -22,6 +22,7 @@ module Obscura
 
       shots.times do
         roll = Random.rand(100) + 1
+        Obscura.logger.debug("Resolve shot precision: #{precision}, roll: #{roll}")
         if roll <= precision
           hits += 1
         end

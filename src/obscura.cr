@@ -14,6 +14,16 @@ require "./obscura/elements/combat_orders_selector"
 require "./obscura/elements/combat_positions"
 require "./obscura/elements/game_info"
 
+require "logger"
+
+module Obscura
+  @@logger = Logger.new(File.open("./obscura_debug.log", "w"))
+  @@logger.level = Logger::DEBUG
+  def self.logger
+    @@logger
+  end
+end
+
 app = Obscura::Application.setup
 game = app.game
 Obscura::GenerateMissions.new(game).run!
