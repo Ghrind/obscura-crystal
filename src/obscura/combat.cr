@@ -6,8 +6,8 @@ require "./actions/resolve_suppressive_fire"
 
 module Obscura
   class Combat
-    @player = Obscura::Fighter.new
-    property :player
+    @players = Array(Obscura::Fighter).new
+    property :players
 
     @ennemies = Array(Obscura::Fighter).new
     property :ennemies
@@ -16,11 +16,19 @@ module Obscura
 
     @turn_orders = Array(CombatOrder).new
 
-    def prepare_turn(order : Obscura::PlayerOrder)
-      @turn_orders << Obscura::CombatOrder.new(@player, order.name, ennemy_at(order.target))
+    def prepare_turn(orders : Array(Obscura::PlayerOrder))
+      orders.each do |order|
+        @turn_orders << Obscura::CombatOrder.new(player_at(order.actor_id).not_nil!, order.name, ennemy_at(order.target_id))
+      end
       ennemies_alive.each do |ennemy|
         action = ennemy.weapon.modes.sample
-        @turn_orders << Obscura::CombatOrder.new(ennemy, action, @player)
+        @turn_orders << Obscura::CombatOrder.new(ennemy, action, @players.sample)
+      end
+    end
+
+    private def player_at(actor_id : String)
+      ["a", "b", "c", "d"].each_with_index do |letter, index|
+        return @players[index] if actor_id == letter
       end
     end
 
@@ -53,7 +61,7 @@ module Obscura
         end
         return message
       when "suppressive-fire"
-        targets = order.actor == @player ? ennemies_alive : [@player]
+        targets = is_player?(order.actor) ? ennemies_alive : players_alive
         result = ResolveSuppressiveFire.new(order.actor, targets).run!
         if result.hits > 0
           message = "#{result.attacker_name} shoots with #{result.weapon_name} (suppressive-fire) and hits #{result.target_names.join(", ")} for #{result.damages.join(", ")} damages"
@@ -77,8 +85,20 @@ module Obscura
       :ongoing
     end
 
+    private def is_player?(fighter : Obscura::Fighter)
+      @players.includes?(fighter)
+    end
+
     def ennemies_alive() Array(Fighter)
       @ennemies.select { |ennemy| !ennemy.dead }
+    end
+
+    def players_alive() Array(Fighter)
+      @players.select { |ennemy| !ennemy.dead }
+    end
+
+    def all_players_dead?() Bool
+      players_alive.empty?
     end
 
     def all_enemies_dead?() Bool

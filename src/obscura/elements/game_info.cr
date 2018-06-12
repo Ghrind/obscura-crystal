@@ -8,8 +8,7 @@ module Obscura
 
     def content() Hydra::ExtendedString
       @value = ["Reputation: #{@game.reputation}",
-                "Player level: #{@game.player.level}",
-                "Player HP: #{@game.player.hit_points}"].join("\n")
+                "Players HP: #{@game.players.map { |player| player.hit_points }.join("/")}"].join("\n")
 
       super
     end

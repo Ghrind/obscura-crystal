@@ -4,8 +4,8 @@ module Obscura
   class CombatPositions < Hydra::Text
     TEMPLATE = [
       "73    ",
-      "51A   ",
-      "62    ",
+      "51AC  ",
+      "62BD  ",
       "84    ",
       "      ",
       "      ",

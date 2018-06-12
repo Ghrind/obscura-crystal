@@ -10,8 +10,8 @@ module Obscura
     @reputation = INITIAL_REPUTATION
     property :reputation
 
-    @player = Obscura::Fighter.new
-    property :player
+    @players = Array(Obscura::Fighter).new
+    property :players
 
     @missions = Array(Obscura::Mission).new
     property :missions
@@ -29,7 +29,7 @@ module Obscura
     end
 
     def lost?
-      @player.dead
+      @players.all? { |player| player.dead }
     end
   end
 end

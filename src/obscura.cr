@@ -9,6 +9,7 @@ require "./obscura/actions/start_mission"
 require "./obscura/actions/win_current_mission"
 require "./obscura/actions/cancel_current_mission"
 require "./obscura/actions/generate_missions"
+require "./obscura/actions/generate_players"
 require "./obscura/elements/missions_list"
 require "./obscura/elements/combat_orders_selector"
 require "./obscura/elements/combat_positions"
@@ -27,21 +28,7 @@ end
 app = Obscura::Application.setup
 game = app.game
 Obscura::GenerateMissions.new(game).run!
-
-game.player = Obscura::Fighter.new.tap do |player|
-  player.name = "Player"
-  weapon = Obscura::Weapon.new
-  weapon.name = "Pistol"
-  weapon.modes = ["single-shot", "burst", "precision-shot", "suppressive-fire"]
-  weapon.damage_min = 3
-  weapon.damage_max = 9
-  weapon.precision = 0
-  weapon.precision_bonus = 10
-  weapon.hits_per_turn = 2
-  player.precision = 75
-  player.weapon = weapon
-  player.hit_points = 100
-end
+game.players = Obscura::GeneratePlayers.new().run!
 
 # Main menu
 
@@ -121,7 +108,7 @@ app.bind("missions-menu", "keypress.enter") do |event_hub, _, elements, _|
       combat_panel = elements.by_id("combat-panel").as(Obscura::CombatPositions)
       combat = Obscura::Combat.new
       combat.ennemies = game.current_mission.not_nil!.encounter.ennemies
-      combat.player = game.player
+      combat.players = game.players
       game.current_combat = combat
       combat_panel.combat = combat
 
@@ -133,6 +120,7 @@ app.bind("missions-menu", "keypress.enter") do |event_hub, _, elements, _|
         Obscura::CombatOrderTemplate.new("w", "wait"),
         Obscura::CombatOrderTemplate.new("f", "flee"),
       ]
+      combat_orders.available_actors = ["a", "b", "c", "d"]
       combat_orders.available_targets = combat.identifiers(combat.ennemies)
 
       elements.by_id("missions-menu").hide
@@ -179,8 +167,8 @@ app.bind("combat-unroller", "keypress. ") do |event_hub, _, elements, state|
   else
     result = combat.unroll!
     app.game_message(result)
-    if game.player.dead
-      app.game_message("#{game.player.name} is dead")
+    if combat.all_players_dead?
+      app.game_message("All players are dead...")
     end
   end
   false
@@ -224,9 +212,9 @@ app.bind("application.game_lost") do |event_hub, _, elements|
 end
 
 app.bind("combat-orders.complete") do |event_hub, _, elements, _|
-  orders = elements.by_id("combat-orders").as(Obscura::CombatOrdersSelector)
+  orders_selector = elements.by_id("combat-orders").as(Obscura::CombatOrdersSelector)
   combat = game.current_combat.not_nil!
-  combat.prepare_turn(orders.player_order)
+  combat.prepare_turn(orders_selector.orders)
   event_hub.focus("combat-unroller")
   true
 end
