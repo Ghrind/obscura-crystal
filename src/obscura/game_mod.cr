@@ -42,6 +42,7 @@ module Obscura
       "Cybermaw",
       "Agressor",
       "Violator",
+      "Enforcer",
     ]
 
     def self.random_ennemy_type() String

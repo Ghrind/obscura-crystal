@@ -31,13 +31,14 @@ Obscura::GenerateMissions.new(game).run!
 game.player = Obscura::Fighter.new.tap do |player|
   player.name = "Player"
   weapon = Obscura::Weapon.new
-  weapon.name = "Assault rifle"
-  weapon.modes = ["burst", "precision-shot", "suppressive-fire"]
-  weapon.damage_min = 5
-  weapon.damage_max = 15
+  weapon.name = "Pistol"
+  weapon.modes = ["single-shot", "burst", "precision-shot", "suppressive-fire"]
+  weapon.damage_min = 3
+  weapon.damage_max = 9
   weapon.precision = 0
-  weapon.precision_bonus = 15
-  weapon.hits_per_turn = 3
+  weapon.precision_bonus = 10
+  weapon.hits_per_turn = 2
+  player.precision = 75
   player.weapon = weapon
   player.hit_points = 100
 end
@@ -128,7 +129,7 @@ app.bind("missions-menu", "keypress.enter") do |event_hub, _, elements, _|
       combat_orders.available_orders = [
         Obscura::CombatOrderTemplate.new("b", "burst", true),
         Obscura::CombatOrderTemplate.new("p", "precision-shot", true),
-        Obscura::CombatOrderTemplate.new("s", "suppressive-fire"),
+        Obscura::CombatOrderTemplate.new("s", "suppressive-fire"), # Spray'n'pray
         Obscura::CombatOrderTemplate.new("w", "wait"),
         Obscura::CombatOrderTemplate.new("f", "flee"),
       ]

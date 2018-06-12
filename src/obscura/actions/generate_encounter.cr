@@ -24,6 +24,17 @@ module Obscura
         ennemy = Obscura::Fighter.new
         ennemy.name = Obscura::GameMod.random_ennemy_type
         case ennemy.name
+        when "Enforcer"
+          ennemy.hit_points = 8
+          weapon = Weapon.new
+          weapon.name = "Assault rifle"
+          weapon.modes = ["burst", "precision-shot", "suppressive-fire"]
+          weapon.damage_min = 5
+          weapon.damage_max = 15
+          weapon.precision = 0
+          weapon.precision_bonus = 15
+          weapon.hits_per_turn = 3
+          ennemy.weapon = weapon
         when "Violator"
           ennemy.hit_points = 6
           weapon = Weapon.new
