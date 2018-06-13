@@ -66,8 +66,8 @@ module Obscura
     end
 
     def receive_char(char : String)
-      if @current_order.actor_required? && inactive_actors.includes?(char)
-        @current_order.actor_id = char
+      if @current_order.actor_required?
+        @current_order.actor_id = char if inactive_actors.includes?(char)
       elsif @current_order.order_required?
         template = find_template(char)
         if template

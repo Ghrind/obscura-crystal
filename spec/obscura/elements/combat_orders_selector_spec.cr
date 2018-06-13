@@ -51,6 +51,15 @@ describe "CombatOrdersSelector" do
           selector.orders.last.actor_required?.should eq true
         end
       end
+      context "when receiving an action shortcut" do
+        it "does nothing" do
+          selector = init_selector
+          selector.receive_char "f"
+          selector.orders.size.should eq 1
+          selector.orders.last.actor_required?.should eq true
+          selector.orders.last.order_required?.should eq true
+        end
+      end
       context "when the order for that actor is already defined" do
         it "does nothing" do
           selector = init_selector
