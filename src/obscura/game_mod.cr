@@ -30,6 +30,9 @@ module Obscura
       "Hidden",
     ]
 
+    @weapons = Array(Obscura::Weapon).new
+    property :weapons
+
     def self.random_mission_name() String
       if Random.rand(2) == 0
         [MISSION_NAME_TYPES.sample, MISSION_NAME_SUFFIX.sample].join(" ")

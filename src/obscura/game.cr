@@ -24,6 +24,9 @@ module Obscura
     @current_combat = nil
     property :current_combat
 
+    @mod = Obscura::GameMod.new
+    property :mod
+
     def won?
       @reputation >= MAXIMUM_REPUTATION
     end

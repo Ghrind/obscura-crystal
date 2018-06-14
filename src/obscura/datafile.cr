@@ -9,7 +9,7 @@ module Obscura
       @content = Array(T).new
     end
 
-    def as_weapons!
+    def as_weapons!() Obscura::Datafile(T)
       each_row do |row|
         weapon = Obscura::Weapon.new
         weapon.precision = row["precision"].to_i
@@ -21,6 +21,7 @@ module Obscura
         weapon.modes = row["modes"].split(",")
         weapon
       end
+      self
     end
 
     private def each_row(&block)

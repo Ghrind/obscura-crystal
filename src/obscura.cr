@@ -14,6 +14,7 @@ require "./obscura/elements/missions_list"
 require "./obscura/elements/combat_orders_selector"
 require "./obscura/elements/combat_positions"
 require "./obscura/elements/game_info"
+require "./obscura/datafile"
 
 require "logger"
 
@@ -23,10 +24,17 @@ module Obscura
   def self.logger
     @@logger
   end
+
+  def self.root
+    Process.executable_path
+  end
 end
 
+mod = Obscura::GameMod.new
+mod.weapons = Obscura::Datafile(Obscura::Weapon).new(File.join("./data/weapons.csv")).as_weapons!.content
 app = Obscura::Application.setup
 game = app.game
+game.mod = mod
 Obscura::GenerateMissions.new(game).run!
 game.players = Obscura::GeneratePlayers.new().run!
 
