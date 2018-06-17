@@ -84,8 +84,10 @@ module Obscura
 
     private def inactive_actor_ids
       ids = Array(String).new
-      @available_actors.keys.each do |id|
-        ids << id unless active_actor_ids.includes?(id)
+      @available_actors.each do |id, actor|
+        next if actor.dead?
+        next if active_actor_ids.includes?(id)
+        ids << id
       end
       ids
     end

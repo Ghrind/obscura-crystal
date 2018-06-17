@@ -26,7 +26,7 @@ module Obscura
     @prefered_weapons = Array(String).new
     property :prefered_weapons
 
-    def dead
+    def dead?
       @hit_points <= 0
     end
   end

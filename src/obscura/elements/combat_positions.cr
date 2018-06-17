@@ -23,7 +23,7 @@ module Obscura
         if @combat.ennemies[i]?
           ennemy = @combat.ennemies[i]
           string = "#{n}. #{ennemy.name} #{ennemy.hit_points}"
-          string = "<red-fg>#{string}</red-fg>" if @combat.ennemies[i].dead
+          string = "<red-fg>#{string}</red-fg>" if @combat.ennemies[i].dead?
           rows[i] += string
         else
           rows.each_with_index do |row, index|

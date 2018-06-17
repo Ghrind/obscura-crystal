@@ -32,7 +32,7 @@ module Obscura
     end
 
     def lost?
-      @players.all? { |player| player.dead }
+      @players.all? { |player| player.dead? }
     end
   end
 end

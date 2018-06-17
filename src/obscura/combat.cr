@@ -44,7 +44,7 @@ module Obscura
 
     def unroll!() : String
       order = @turn_orders.shift
-      if order.actor.dead
+      if order.actor.dead?
         return "#{order.actor.name} is dead and cannot do anything..."
       end
       case order.name
@@ -90,11 +90,11 @@ module Obscura
     end
 
     def ennemies_alive() Array(Fighter)
-      @ennemies.select { |ennemy| !ennemy.dead }
+      @ennemies.select { |ennemy| !ennemy.dead? }
     end
 
     def players_alive() Array(Fighter)
-      @players.select { |ennemy| !ennemy.dead }
+      @players.select { |ennemy| !ennemy.dead? }
     end
 
     def all_players_dead?() Bool
