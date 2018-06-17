@@ -26,7 +26,7 @@ module Obscura
 
         # Leveling
         ennemy.precision += @difficulty
-        ennemy.hit_points *= ennemy.hit_points
+        ennemy.hit_points *= @difficulty
         ennemy.weapon.damage_min *= @difficulty
         ennemy.weapon.damage_max *= @difficulty
 
