@@ -35,7 +35,7 @@ app = Obscura::Application.setup
 game = app.game
 game.mod = mod
 Obscura::GenerateMissions.new(game).run!
-game.players = Obscura::GeneratePlayers.new(game.mod.weapons).run!
+game.players = Obscura::GeneratePlayers.new(game.mod).run!
 
 # Main menu
 

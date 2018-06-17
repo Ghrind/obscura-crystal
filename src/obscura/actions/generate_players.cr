@@ -1,22 +1,42 @@
 require "./../fighter"
-require "./../weapon"
+require "./../game_mod"
 
 module Obscura
   class GeneratePlayers
-    def initialize(@weapons : Array(Obscura::Weapon))
+    NAMES = [
+      "Sarge",
+      "Warhead",
+      "Nail",
+      "Meat Popsicle",
+    ]
+
+    WEAPONS = [
+      "Assault rifle",
+      "Shotgun",
+      "Sniper rifle",
+      "Machinegun",
+    ]
+
+    
+    def initialize(@mod : Obscura::GameMod)
     end
 
     def run!() Array(Obscura::Fighter)
       players = Array(Obscura::Fighter).new
       4.times do |i|
-        player = Obscura::Fighter.new
-        player.name = "Player #{i + 1}"
-        player.precision = 75
-        player.weapon = @weapons.sample
-        player.hit_points = 100
+        player = init_player
+        player.name = NAMES[i]
+        player.weapon = @mod.find_weapon(WEAPONS[i])
         players << player
       end
       players
+    end
+
+    private def init_player
+      player = Obscura::Fighter.new
+      player.precision = 75
+      player.hit_points = 100
+      player
     end
   end
 end
