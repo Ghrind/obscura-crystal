@@ -34,7 +34,7 @@ app = Obscura::Application.setup
 game = app.game
 game.mod = mod
 Obscura::GenerateMissions.new(game).run!
-game.players = Obscura::GeneratePlayers.new().run!
+game.players = Obscura::GeneratePlayers.new(game.mod.weapons).run!
 
 # Main menu
 
@@ -119,14 +119,7 @@ app.bind("missions-menu", "keypress.enter") do |event_hub, _, elements, _|
       combat_panel.combat = combat
 
       combat_orders = elements.by_id("combat-orders").as(Obscura::CombatOrdersSelector)
-      combat_orders.available_orders = [
-        Obscura::CombatOrderTemplate.new("b", "burst", true),
-        Obscura::CombatOrderTemplate.new("p", "precision-shot", true),
-        Obscura::CombatOrderTemplate.new("s", "suppressive-fire"), # Spray'n'pray
-        Obscura::CombatOrderTemplate.new("w", "wait"),
-        Obscura::CombatOrderTemplate.new("f", "flee"),
-      ]
-      combat_orders.available_actors = ["a", "b", "c", "d"]
+      combat_orders.players = game.players
       combat_orders.available_targets = combat.identifiers(combat.ennemies)
 
       elements.by_id("missions-menu").hide

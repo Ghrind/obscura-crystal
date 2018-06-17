@@ -4,11 +4,9 @@ require "./../player_order"
 
 module Obscura
   class CombatOrdersSelector < Hydra::Text
-    @available_actors = Array(String).new
-    property :available_actors
+    ACTOR_IDENTIFIERS = ["a", "b", "c", "d"]
 
-    @available_orders = Array(Obscura::CombatOrderTemplate).new
-    property :available_orders
+    @available_actors = Hash(String, Obscura::Fighter).new
 
     @available_targets = Array(String).new
     property :available_targets
@@ -30,13 +28,32 @@ module Obscura
       if ready?
         @value = "Orders ready!"
       elsif @current_order.actor_required?
-        @value = "Who? #{inactive_actors.join(", ")}"
+        @value = "Fighter? #{inactive_actor_ids.join(", ")}"
       elsif @current_order.order_required?
-        @value = @available_orders.map { |order| order_name(order) }.join(", ") + "?"
+        @value = available_orders.map { |order| order_name(order) }.join(", ") + "?"
       elsif (order = current_order_template) && order.require_target
         @value = "Target? #{@available_targets.join(", ")}"
       end
       super
+    end
+
+    def players=(players : Array(Obscura::Fighter))
+      players.each_with_index do |player, index|
+        @available_actors[ACTOR_IDENTIFIERS[index]] = player
+      end
+    end
+
+    private def available_orders
+      orders = Array(Obscura::CombatOrderTemplate).new
+      modes = current_actor.weapon.modes
+
+      orders << Obscura::CombatOrderTemplate.new("s", "single-shot", true) if modes.includes?("single-shot")
+      orders << Obscura::CombatOrderTemplate.new("b", "burst", true) if modes.includes?("burst")
+      orders << Obscura::CombatOrderTemplate.new("p", "precision-shot", true) if modes.includes?("precision-shot")
+      orders << Obscura::CombatOrderTemplate.new("u", "suppressive-fire") if modes.includes?("suppressive-fire")
+      orders << Obscura::CombatOrderTemplate.new("w", "wait")
+      orders << Obscura::CombatOrderTemplate.new("f", "flee")
+      orders
     end
 
     private def order_name(order : Obscura::CombatOrderTemplate)
@@ -48,7 +65,11 @@ module Obscura
     end
 
     private def all_actors_ready?
-      inactive_actors.empty?
+      inactive_actor_ids.empty?
+    end
+
+    private def current_actor() Obscura::Fighter
+      @available_actors[@current_order.actor_id.not_nil!]
     end
 
     def reset!
@@ -57,17 +78,21 @@ module Obscura
       new_order
     end
 
-    private def active_actors
+    private def active_actor_ids
       @orders.map { |order| order.actor_id }
     end
 
-    private def inactive_actors
-      @available_actors.select { |actor| !active_actors.includes?(actor) }
+    private def inactive_actor_ids
+      ids = Array(String).new
+      @available_actors.keys.each do |id|
+        ids << id unless active_actor_ids.includes?(id)
+      end
+      ids
     end
 
     def receive_char(char : String)
       if @current_order.actor_required?
-        @current_order.actor_id = char if inactive_actors.includes?(char)
+        @current_order.actor_id = char if inactive_actor_ids.includes?(char)
       elsif @current_order.order_required?
         template = find_template(char)
         if template
@@ -103,11 +128,11 @@ module Obscura
     end
 
     private def find_template(char : String)
-      @available_orders.find { |order| order.shortcut == char }
+      available_orders.find { |order| order.shortcut == char }
     end
 
     private def current_order_template
-      @available_orders.find { |order| order.name == @current_order.name }
+      available_orders.find { |order| order.name == @current_order.name }
     end
 
     def on_register(event_hub : Hydra::EventHub)
