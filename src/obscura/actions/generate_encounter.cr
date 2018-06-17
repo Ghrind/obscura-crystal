@@ -21,8 +21,15 @@ module Obscura
       ennemies_count = rand(max_ennemies - min_ennemies) + min_ennemies
 
       (ennemies_count).times do
-        ennemy = @game_mod.random_ennemy
-        ennemy.weapon = @game_mod.find_weapon(ennemy.prefered_weapons.first)
+        ennemy = @game_mod.random_ennemy.dup
+        ennemy.weapon = @game_mod.find_weapon(ennemy.prefered_weapons.first).dup
+
+        # Leveling
+        ennemy.precision += @difficulty
+        ennemy.hit_points *= ennemy.hit_points
+        ennemy.weapon.damage_min *= @difficulty
+        ennemy.weapon.damage_max *= @difficulty
+
         encounter.ennemies << ennemy
       end
       encounter
