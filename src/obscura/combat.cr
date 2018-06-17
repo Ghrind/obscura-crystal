@@ -22,7 +22,7 @@ module Obscura
       end
       ennemies_alive.each do |ennemy|
         action = ennemy.weapon.modes.sample
-        @turn_orders << Obscura::CombatOrder.new(ennemy, action, @players.sample)
+        @turn_orders << Obscura::CombatOrder.new(ennemy, action, players_alive.sample)
       end
     end
 
