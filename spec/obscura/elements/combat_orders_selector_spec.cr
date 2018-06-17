@@ -2,12 +2,9 @@ require "spec"
 require "../../../src/obscura/elements/combat_orders_selector"
 
 def init_selector
-  selector = Obscura::CombatOrdersSelector.new("foobar")
-  selector.available_actors = ["a", "b"]
-  selector.available_orders = [
-    Obscura::CombatOrderTemplate.new("f", "foo", false),
-    Obscura::CombatOrderTemplate.new("b", "bar", true),
-  ]
+  selector = Obscura::CombatOrdersSelector.new("foobar", { :width => "16" })
+  players = [Obscura::Fighter.new, Obscura::Fighter.new]
+  selector.players = players
   selector
 end
 
@@ -16,23 +13,23 @@ describe "CombatOrdersSelector" do
     context "when an actor is required" do
       it "show all actors" do
         selector = init_selector
-        selector.content.stripped.should eq ["┌──────────┐",
-                                             "│Who? a, b │",
-                                             "└──────────┘"].join("\n")
+        selector.content.stripped.should eq ["┌──────────────┐",
+                                             "│Fighter? a, b │",
+                                             "└──────────────┘"].join("\n")
       end
       context "when some actors already have an order" do
         it "shows only inactive actors" do
           selector = init_selector
           selector.receive_char("a")
           selector.receive_char("f")
-          selector.content.stripped.should eq ["┌──────────┐",
-                                               "│Who? b    │",
-                                               "└──────────┘"].join("\n")
+          selector.content.stripped.should eq ["┌──────────────┐",
+                                               "│Fighter? b    │",
+                                               "└──────────────┘"].join("\n")
         end
       end
     end
-    
   end
+
   describe "#receive_char" do
     context "when expecting an actors id" do
       context "when receiving an actor id" do
@@ -78,7 +75,7 @@ describe "CombatOrdersSelector" do
           selector.receive_char "a"
           selector.receive_char "f"
           selector.orders.empty?.should eq false
-          selector.orders.first.name.should eq "foo"
+          selector.orders.first.name.should eq "flee"
         end
         context "when the order is complete" do
           it "saves the order and init another" do
@@ -93,9 +90,9 @@ describe "CombatOrdersSelector" do
           it "does not add a blank order" do
             selector = init_selector
             selector.receive_char "a" # Actor a
-            selector.receive_char "f" # Order foo
+            selector.receive_char "f" # Order flee
             selector.receive_char "b" # Actor b
-            selector.receive_char "f" # Order foo
+            selector.receive_char "f" # Order flee
             selector.orders.size.should eq 2
           end
         end
