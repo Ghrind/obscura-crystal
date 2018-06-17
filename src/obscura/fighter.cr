@@ -23,6 +23,9 @@ module Obscura
     @damage_reduction = 0
     property :damage_reduction
 
+    @prefered_weapons = Array(String).new
+    property :prefered_weapons
+
     def dead
       @hit_points <= 0
     end

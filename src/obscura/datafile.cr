@@ -24,6 +24,19 @@ module Obscura
       self
     end
 
+    def as_fighters!() Obscura::Datafile(T)
+      each_row do |row|
+        fighter = Obscura::Fighter.new
+        fighter.name = row["name"]
+        fighter.hit_points = row["hit_points"].to_i
+        fighter.level = row["level"].to_i
+        fighter.precision = row["precision"].to_i
+        fighter.prefered_weapons = row["prefered_weapons"].split(",")
+        fighter
+      end
+      self
+    end
+
     private def each_row(&block)
       file = File.open(@path)
       csv = CSV.new(file, { :headers => true })

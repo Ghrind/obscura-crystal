@@ -1,0 +1,5 @@
+name,level,hit_points,precision,damage_reduction,prefered_weapons
+Enforcer,1,8,50,0,"Assault rifle"
+Violator,1,6,50,0,"Sniper rifle"
+Cybermaw,1,10,50,0,"Shotgun"
+Agressor,1,6,50,0,"Machinegun"

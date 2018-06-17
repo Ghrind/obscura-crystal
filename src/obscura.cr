@@ -24,14 +24,12 @@ module Obscura
   def self.logger
     @@logger
   end
-
-  def self.root
-    Process.executable_path
-  end
 end
 
+mod_path = "./data"
 mod = Obscura::GameMod.new
-mod.weapons = Obscura::Datafile(Obscura::Weapon).new(File.join("./data/weapons.csv")).as_weapons!.content
+mod.fighters = Obscura::Datafile(Obscura::Fighter).new(File.join(mod_path, "fighters.csv")).as_fighters!.content
+mod.weapons = Obscura::Datafile(Obscura::Weapon).new(File.join(mod_path, "weapons.csv")).as_weapons!.content
 app = Obscura::Application.setup
 game = app.game
 game.mod = mod

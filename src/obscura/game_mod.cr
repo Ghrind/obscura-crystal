@@ -33,6 +33,9 @@ module Obscura
     @weapons = Array(Obscura::Weapon).new
     property :weapons
 
+    @fighters = Array(Obscura::Fighter).new
+    property :fighters
+
     def self.random_mission_name() String
       if Random.rand(2) == 0
         [MISSION_NAME_TYPES.sample, MISSION_NAME_SUFFIX.sample].join(" ")
@@ -41,15 +44,14 @@ module Obscura
       end
     end
 
-    ENNEMY_TYPES = [
-      "Cybermaw",
-      "Agressor",
-      "Violator",
-      "Enforcer",
-    ]
+    def find_weapon(weapon_name) Obscura::Weapon
+      weapon = @weapons.find { |w| w.name == weapon_name }
+      return weapon if weapon
+      Obscura::Weapon.new
+    end
 
-    def self.random_ennemy_type() String
-      ENNEMY_TYPES.sample
+    def random_ennemy() Obscura::Fighter
+      @fighters.sample
     end
   end
 end
