@@ -8,11 +8,11 @@ module Obscura
     end
 
     def min_ennemies
-      @difficulty / 20 + 1
+      @difficulty / 2 + 1
     end
 
     def max_ennemies
-      [8 - (10 - @difficulty / 10), min_ennemies].max
+      [8 - (10 - @difficulty), min_ennemies].max
     end
 
     def run!() Obscura::Encounter

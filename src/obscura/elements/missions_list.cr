@@ -5,7 +5,7 @@ module Obscura
 
     def content() Hydra::ExtendedString
       @items = @missions.map do |mission|
-        string = "#{mission.name} (#{mission.difficulty})"
+        string = "#{mission.name} (#{mission.reputation_bonus})"
         string = "<green-fg>#{string}</green-fg>" if mission.completed
         Hydra::ExtendedString.new(string)
       end

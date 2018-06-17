@@ -8,7 +8,7 @@ module Obscura
     def run!
       mission = @game.current_mission.not_nil!
       mission.completed = true
-      @game.reputation += mission.difficulty
+      @game.reputation += mission.reputation_bonus
       @game.current_mission = nil
       MissionResult.new(mission.name)
     end

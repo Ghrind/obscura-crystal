@@ -9,7 +9,8 @@ module Obscura
       10.times do
         mission = Obscura::Mission.new
         mission.name = Obscura::GameMod.random_mission_name
-        mission.difficulty = (Random.rand(10) + 1) * 10
+        mission.difficulty = (Random.rand(10) + 1)
+        mission.reputation_bonus = mission.difficulty * 10
         mission.encounter = Obscura::GenerateEncounter.new(@game.mod, mission.difficulty).run!
         @game.missions.push mission
       end
