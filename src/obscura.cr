@@ -13,6 +13,7 @@ require "./obscura/actions/generate_players"
 require "./obscura/elements/missions_list"
 require "./obscura/elements/combat_orders_selector"
 require "./obscura/elements/combat_positions"
+require "./obscura/elements/players_display"
 require "./obscura/elements/game_info"
 require "./obscura/datafile"
 
@@ -67,6 +68,7 @@ app.bind("main-menu", "keypress.enter") do |event_hub, _, elements, _|
     elements.by_id("game-info").show
     elements.by_id("messages").show
     elements.by_id("missions-menu").show
+    elements.by_id("players-display").show
     event_hub.focus("missions-menu")
   end
   false
@@ -188,7 +190,7 @@ app.bind("combat-orders.turn_complete") do |event_hub, _, elements|
       elements.show_only("winning-screen")
       event_hub.focus("winning-screen")
     else
-      elements.show_only("missions-menu", "game-info", "messages")
+      elements.show_only("missions-menu", "game-info", "messages", "players-display")
       event_hub.focus("missions-menu")
     end
   when :player_flees
@@ -218,13 +220,23 @@ app.bind("combat-orders.complete") do |event_hub, _, elements, _|
   true
 end
 
+# Players display
+players_display = Obscura::PlayersDisplay.new("players-display", {
+  :label => "Fighters",
+  :visible => "false",
+  :position => "15:0",
+  :width => "90",
+})
+players_display.players = game.players
+app.add_element(players_display)
+
 # Messages
 app.add_element({
   :id => "messages",
   :type => "logbox",
   :visible => "false",
   :label => "Messages",
-  :position => "15:0",
+  :position => "22:0",
   :width => "90",
 })
 

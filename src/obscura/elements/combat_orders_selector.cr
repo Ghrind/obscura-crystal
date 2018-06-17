@@ -1,11 +1,13 @@
 require "hydra"
 require "./../combat_order_template"
 require "./../player_order"
+require "./../fighter"
 
 module Obscura
   class CombatOrdersSelector < Hydra::Text
     ACTOR_IDENTIFIERS = ["a", "b", "c", "d"]
 
+    @available_actors : Hash(String, Obscura::Fighter)
     @available_actors = Hash(String, Obscura::Fighter).new
 
     @available_targets = Array(String).new

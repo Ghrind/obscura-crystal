@@ -7,9 +7,7 @@ module Obscura
     property :game
 
     def content() Hydra::ExtendedString
-      @value = ["Reputation: #{@game.reputation}",
-                "Players HP: #{@game.players.map { |player| player.hit_points }.join("/")}"].join("\n")
-
+      @value = "Reputation: #{@game.reputation}"
       super
     end
   end
